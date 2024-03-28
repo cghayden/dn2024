@@ -1,38 +1,237 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // provider = "cockroachdb"
+  provider  = "postgresql" // (for render or supabase hosted psql)
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 model User {
-  id    String @id @default(cuid())
-  email String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  password Password?
-  notes    Note[]
+  userId     String      @id @default(uuid()) // UUID type
+  email      String      @unique
+  password   String // Hashed password
+  type       UserType // Enum to identify user role
+  parent     Parent? // Nullable relations to specific user types
+  studio     Studio?
+  instructor Instructor?
 }
 
-model Password {
-  hash String
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
+enum UserType {
+  PARENT
+  STUDIO
+  INSTRUCTOR
 }
 
-model Note {
-  id    String @id @default(cuid())
-  title String
-  body  String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
+enum CompetitiveLevel {
+  RECREATIONAL
+  COMPETITIVE
 }
+
+model Parent {
+  userId       String       @id // UUID type, primary key and foreign key to User
+  user         User         @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  dancers      Dancer[]
+  firstName    String
+  lastName     String
+  danceClasses DanceClass[]
+}
+
+model Dancer {
+  id            String       @id @default(uuid())
+  firstName     String
+  lastName      String
+  birthdate     DateTime?
+  parent        Parent       @relation(fields: [parentId], references: [userId], onDelete: Cascade)
+  parentId      String
+  enrollments   Enrollment[]
+  imageFilename String?
+  Studio        Studio[]
+}
+
+model Studio {
+  userId        String       @id // UUID type, primary key and foreign key to User
+  user          User         @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  name          String
+  danceClasses  DanceClass[]
+  instructors   Instructor[]
+  enrollments   Enrollment[]
+  ageLevels     AgeLevel[]
+  skillLevels   SkillLevel[] //studio defined skill levels. (e.g. recreational, company, rising star, excel, etc.)
+  tights        Tights[]
+  footwear      Footwear[]
+  stylesOfDance String[]
+  Dancer        Dancer?      @relation(fields: [dancerId], references: [id])
+  dancerId      String? // WHY is this there a singular Dancer relation??
+}
+
+model DanceClass {
+  id              String       @id @default(uuid())
+  name            String
+  performanceName String?
+  styleOfDance    String?
+  footwear        Footwear?    @relation(fields: [footwearId], references: [id])
+  footwearId      String?
+  tights          Tights?      @relation(fields: [tightsId], references: [id])
+  tightsId        String?
+  notes           String?
+  song            String?
+  competitions    Boolean?
+  recital         Boolean
+  studio          Studio?      @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId        String?
+  instructor      Instructor?  @relation(fields: [instructorId], references: [userId])
+  instructorId    String?
+  parent          Parent?      @relation(fields: [parentId], references: [userId], onDelete: Cascade)
+  parentId        String?
+  enrollments     Enrollment[]
+  schedules       Schedule[]
+  ageLevel        AgeLevel     @relation(fields: [ageLevelId], references: [id])
+  ageLevelId      String
+  skillLevel      SkillLevel   @relation(fields: [skillLevelId], references: [id])
+  skillLevelId    String
+}
+
+model Enrollment {
+  id        String     @id @default(uuid())
+  dancer    Dancer     @relation(fields: [dancerId], references: [id], onDelete: Cascade)
+  dancerId  String
+  class     DanceClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId   String
+  studio    Studio     @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId  String
+  requested DateTime?  @default(now())
+  approved  DateTime?  @default(now())
+}
+
+model Tights {
+  id            String       @id @default(uuid())
+  name          String
+  description   String?
+  url           String?
+  imageFilename String?
+  studio        Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId      String
+  danceClasses  DanceClass[]
+  color         String?
+}
+
+model Footwear {
+  id            String       @id @default(uuid())
+  name          String
+  description   String?
+  url           String?
+  studio        Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId      String
+  danceClasses  DanceClass[]
+  imageFilename String?
+  color         String?
+}
+
+model Instructor {
+  userId     String       @id // ID type, primary key and foreign key to User
+  user       User         @relation(fields: [userId], references: [userId])
+  firstName  String
+  lastName   String
+  studios    Studio[] // Many-to-many relationship with Studio
+  danceClass DanceClass[]
+}
+
+model SkillLevel {
+  id           String       @id @default(uuid())
+  name         String // e.g. 'recreational', 'company', 'excel' or any custom skill level defined by studio
+  description  String?
+  studio       Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId     String
+  danceClasses DanceClass[]
+}
+
+model AgeLevel {
+  id           String       @id @default(uuid())
+  name         String // e.g. 'beginner', 'senior', or any custom name
+  description  String?
+  studio       Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId     String
+  danceClasses DanceClass[]
+}
+
+model Schedule {
+  id        String     @id @default(uuid())
+  class     DanceClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId   String
+  startTime DateTime
+  endTime   DateTime
+  dayOfWeek String
+}
+
+// notes:
+
+// EXPLICIT StudioInstructor model: would allow for metadata on the studio to instructor relationship, i.e. who created to instrucor role at a studio or added/subtracted permissions of an instructor at a studio 
+// model StudioInstructor {
+//   studioId     Int
+//   instructorId Int
+//   studio       Studio    @relation(fields: [studioId], references: [userId])
+//   instructor   Instructor @relation(fields: [instructorId], references: [userId])
+//   @@id([studioId, instructorId])
+// }
+
+// Creating a separate `Schedule` model can bring several benefits compared to having `startTime`, `endTime`, and `dayOfWeek` fields directly on the `DanceClass` model. Here are some considerations:
+
+// 1. **Flexibility**:
+//    - With a separate `Schedule` model, you can handle multiple schedule entries for a single `DanceClass`. This can be useful if a dance class meets at different times on different days.
+//    - It allows for more complex scheduling scenarios such as classes that meet bi-weekly, or have differing schedules through the year.
+
+// 2. **Normalization**:
+//    - Database normalization helps to eliminate redundancy and inconsistent dependency by organizing data in database tables.
+//    - By separating schedules into their own model, you can maintain a cleaner, normalized database schema which adheres to good database design practices.
+
+// 3. **Ease of Updating**:
+//    - It’s easier to manage and update schedules independently without affecting the `DanceClass` table.
+//    - This separation can help reduce the complexity and potential errors when updating class schedules.
+
+// 4. **Reusability**:
+//    - If schedules are stored separately, they could potentially be reused for different dance classes or other scheduled entities within the system.
+
+// 5. **Query Efficiency**:
+//    - Having a separate `Schedule` model can lead to more efficient queries, as you can fetch or update schedule information without touching the `DanceClass` table.
+//    - This is particularly useful in larger systems or systems with a lot of database traffic.
+
+// 6. **Extensibility**:
+//    - If in the future, scheduling needs become more complex (e.g., adding location, instructor availability, special notes for certain days), having a separate `Schedule` model makes it easier to extend the schema to accommodate these new requirements.
+
+// 7. **Clearer Relations**:
+//    - With a `Schedule` model, you can clearly define the relationship between a dance class and its schedule(s), which can be more intuitive and self-explanatory for others (or future-you) working on the project.
+
+// These are general benefits and the actual impact may vary based on the specific requirements and scale of your application.
+
+// Creating a separate `Enrollment` model as a junction table between `DanceClass` and `Dancer` models offers several advantages over directly connecting `Dancer` to `DanceClass` with an array field. Here are some reasons why this approach is better:
+
+// 1. **Rich Relationships**:
+//    - An `Enrollment` model can store additional information about the relationship between a `Dancer` and a `DanceClass`. For instance, it might store the date of enrollment, attendance records, performance grades, or any other relevant information.
+//    - This provides a rich relationship that can evolve over time as the application's requirements change.
+
+// 2. **Database Normalization**:
+//    - Using a junction table like `Enrollment` is a normalized approach that helps maintain data integrity and consistency in many-to-many relationships.
+//    - It's a common practice in database design, making your schema more understandable and maintainable.
+
+// 3. **Scalability**:
+//    - As the number of dancers and classes grows, a separate `Enrollment` model helps to keep the database organized and querying efficient.
+//    - Direct arrays can become problematic in terms of performance and management in larger datasets.
+
+// 4. **Ease of Querying**:
+//    - It’s easier and more efficient to query, update, or delete relationships through a dedicated `Enrollment` model.
+//    - Complex queries and joins are more straightforward with this kind of setup.
+
+// 5. **Extensibility**:
+//    - If your application evolves to include new features or data points related to a dancer's enrollment in a class, having a separate `Enrollment` model makes it easier to extend the schema.
+
+// 6. **Data Integrity**:
+//    - An `Enrollment` model helps ensure data integrity by clearly defining the relationships and potentially setting up cascading deletes or updates.
+
+// 7. **Consistency**:
+//    - This approach promotes a consistent way of handling many-to-many relationships throughout your application, which is beneficial for code maintainability and readability.
+
+// These advantages make the `Enrollment` model a more robust and flexible choice for managing the many-to-many relationship between dancers and dance classes in your web application.

@@ -1,0 +1,51 @@
+.btn {
+  border-radius: 0.5rem;
+  padding: 8px 12px;
+  color: var(--tw-slate-50);
+}
+.btn-sm {
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+.btn-xs {
+  padding: 2px 3px;
+  font-size: 10px;
+}
+
+.btn-action {
+  background-color: var(--tw-indigo-500);
+}
+
+.btn-action:disabled {
+  background-color: var(--tw-slate-500);
+}
+
+.btn-confirm {
+  background-color: var(--tw-cyan-600);
+}
+
+.btn-confirm:disabled {
+  background-color: var(--tw-slate-300);
+}
+
+.btn-cancel {
+  background-color: var(--tw-rose-700);
+}
+.btn-cancel:disabled {
+  background-color: var(--tw-slate-300);
+}
+
+.btn-noBg-cancel {
+  color: var(--tw-rose-700);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-noBg-action {
+  color: var(--tw-indigo-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
