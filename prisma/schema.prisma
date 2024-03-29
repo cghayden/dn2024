@@ -72,8 +72,8 @@ model DanceClass {
   id              String       @id @default(uuid())
   name            String
   performanceName String?
-  styleOfDance    StyleOfDance? @relation(fields: [styleOfDanceId], references: [id])
-  styleOfDanceId    String?
+  styleOfDance    StyleOfDance @relation(fields: [styleOfDanceId], references: [id])
+  styleOfDanceId    String
   footwear        Footwear?    @relation(fields: [footwearId], references: [id])
   footwearId      String?
   tights          Tights?      @relation(fields: [tightsId], references: [id])

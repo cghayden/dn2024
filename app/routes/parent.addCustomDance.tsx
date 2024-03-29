@@ -28,6 +28,7 @@ const danceSchema = z.object({
   tightsId: z.string().optional(),
   footwearId: z.string().optional(),
   studioId: z.string().optional(),
+  styleOfDanceId: z.string(),
 });
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -50,6 +51,7 @@ export async function action({ request }: ActionFunctionArgs) {
     tightsId,
     footwearId,
     studioId,
+    styleOfDanceId,
   } = submission.value;
 
   await createParentCustomDance({
@@ -63,6 +65,7 @@ export async function action({ request }: ActionFunctionArgs) {
     tightsId,
     footwearId,
     studioId,
+    styleOfDanceId,
   }).catch((err) => {
     throw new Error(err.message);
   });
