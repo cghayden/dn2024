@@ -47,18 +47,18 @@ export function UpsertLevelForm({
 
   return (
     <tr>
-      <td className="relative">
+      <td className="grid" style={{ gridTemplateColumns: "1fr 70px" }}>
         <fetcher.Form
           {...form.props}
           id={level?.id ?? `new${levelType}`}
           method="post"
           action="../settings/ResourceEditLevels"
-          className="pl-3"
           ref={formRef}
+          className="py-1"
         >
           <input name={"levelId"} value={level?.id ?? "new"} type="hidden" />
           <input name={"levelType"} value={levelType} type="hidden" />
-          <div className=" levels_edit">
+          <div className=" levels_edit grid grid-cols-2 gap-1">
             <TextInput
               label={""}
               name="newLevelName"
@@ -81,22 +81,19 @@ export function UpsertLevelForm({
                   : undefined
               }
             />
-            <div className="w-[80px]">
-              {showSaveButton && (
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  form={level?.id ?? `new${levelType}`}
-                  className="text-sm rounded bg-blue-500  text-white hover:bg-blue-600 focus:bg-blue-400  transition duration-150 ease-in-out ml-auto px-2 py-[2px] "
-                >
-                  Save
-                </button>
-              )}
-            </div>
           </div>
         </fetcher.Form>
-        <div>
-          {level ? (
+        <div className="buttonContainer flex justify-center items-center">
+          {showSaveButton ? (
+            <button
+              type="submit"
+              disabled={isSaving}
+              form={level?.id ?? `new${levelType}`}
+              className="text-sm rounded bg-blue-500  text-white hover:bg-blue-600 focus:bg-blue-400  transition duration-150 ease-in-out px-2 py-[2px]"
+            >
+              Save
+            </button>
+          ) : level ? (
             <DeleteLevel
               levelType={levelType}
               levelId={level.id}

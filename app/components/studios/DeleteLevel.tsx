@@ -1,5 +1,6 @@
 import { FetcherWithComponents, useFetcher } from "@remix-run/react";
 import { useEffect } from "react";
+import { al } from "vitest/dist/reporters-5f784f42";
 import type { action } from "~/routes/studio.settings.ResourceDeleteLevel";
 type DeleteLevelProps = {
   levelId: string;
@@ -25,16 +26,18 @@ export default function DeleteLevel({
   //   }
   // }, [fetcher]);
 
-  const handleDelete = (event) => {
+  const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     if (inUse) {
       alert(
         "This level cannot be deleted, as there are dance classes that are using it.  You can edit the level, or change all dance classes that use it to another level, and then delete it",
       );
-    } else {
+    }
+    if (confirm("Are you sure you want to delete this level?")) {
       fetcher.submit(event.currentTarget.form, {
         method: "POST",
       });
-    }
+    } else return;
   };
 
   return (
@@ -43,15 +46,15 @@ export default function DeleteLevel({
         id={`delete${levelId}`}
         method="post"
         action="../settings/ResourceDeleteLevel"
-        className="pl-3 absolute top-1/2 -translate-y-1/2 right-4"
+        className=""
       >
         <input type="hidden" name="levelId" value={levelId} />
         <input type="hidden" name="levelType" value={levelType} />
         <button
           disabled={isDeleting}
           form={`delete${levelId}`}
-          onClick={() => handleDelete()}
-          className="text-sm rounded bg-blue-500  text-white hover:bg-blue-600 focus:bg-blue-400  transition duration-150 ease-in-out ml-auto px-2 py-[2px] "
+          onClick={(e) => handleDelete(e)}
+          className="text-sm rounded bg-rose-500  text-white hover:bg-rose-600 focus:bg-rose-400  transition duration-150 ease-in-out px-2 py-[2px]"
         >
           Delete
         </button>
