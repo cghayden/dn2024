@@ -68,14 +68,6 @@ model Studio {
   dancerId      String? // WHY is this there a singular Dancer relation??
 }
 
-model StyleOfDance {
-  id      String       @id @default(uuid())
-  name    String
-  studio  Studio       @relation(fields: [studioId], references: [userId])
-  studioId String
-  danceClasses DanceClass[]
-}
-
 model DanceClass {
   id              String       @id @default(uuid())
   name            String
@@ -164,6 +156,15 @@ model AgeLevel {
   description  String?
   studio       Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
   studioId     String
+  danceClasses DanceClass[]
+}
+
+model StyleOfDance {
+  id      String       @id @default(uuid())
+  name    String
+  description String?
+  studio  Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId String
   danceClasses DanceClass[]
 }
 

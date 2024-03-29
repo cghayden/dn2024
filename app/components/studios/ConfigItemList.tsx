@@ -5,20 +5,24 @@ import { ContentContainer } from "~/components/styledComponents/ContentContainer
 import { TableHeader } from "~/components/styledComponents/TableHeader";
 import { Prisma } from "@prisma/client";
 import { cn } from "~/lib/tailwindUtils";
-import { Config } from "tailwind-merge";
-import { Style } from "util";
 
-type AgeLevelWithDanceClasses = Prisma.AgeLevelGetPayload<{
+export type AgeLevelWithDanceClasses = Prisma.AgeLevelGetPayload<{
   include: { danceClasses: { select: { id: true } } };
 }>;
-type SkillLevelWithDanceClasses = Prisma.SkillLevelGetPayload<{
+export type SkillLevelWithDanceClasses = Prisma.SkillLevelGetPayload<{
+  include: { danceClasses: { select: { id: true } } };
+}>;
+export type StyleOfDanceWithDanceClasses = Prisma.StyleOfDanceGetPayload<{
   include: { danceClasses: { select: { id: true } } };
 }>;
 
 type ConfigItemListProps = {
-  data: AgeLevelWithDanceClasses[] | SkillLevelWithDanceClasses[];
-  page: "Age Levels" | "Skill Levels";
-  itemType: "ageLevel" | "skillLevel";
+  data:
+    | AgeLevelWithDanceClasses[]
+    | SkillLevelWithDanceClasses[]
+    | StyleOfDanceWithDanceClasses[];
+  page: "Age Levels" | "Skill Levels" | "Styles of Dance";
+  itemType: "ageLevel" | "skillLevel" | "styleOfDance";
 };
 
 export default function ConfigItemList({
@@ -49,11 +53,6 @@ export default function ConfigItemList({
           )}
         </div>
       </TableHeader>
-      {/* Text that alerts the user that the field is in edit mode.  This is not needed as the red border and 'cancel edit mode' button should be enough of a UI signal: 
-
-        {editMode && (
-          <div className='text-rose-600 absolute bottom-0'>Edit Mode</div>
-        )} */}
 
       <ContentContainer
         className={cn({

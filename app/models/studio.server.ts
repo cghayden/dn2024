@@ -7,6 +7,7 @@ import type {
   Footwear,
   Tights,
   Dancer,
+  StyleOfDance,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { prisma } from "~/db.server";
@@ -226,6 +227,7 @@ export async function getStudioConfig(userId: User["userId"]) {
           id: true,
           name: true,
           studioId: true,
+          description: true,
           danceClasses: {
             select: {
               id: true,
@@ -528,6 +530,31 @@ export async function upsertAgeLevel(
   levelDescription: AgeLevel["description"] = null,
 ) {
   await prisma.ageLevel.upsert({
+    where: {
+      id: levelId,
+    },
+    update: {
+      name: newName,
+      description: levelDescription,
+    },
+    create: {
+      name: newName,
+      description: levelDescription,
+      studio: {
+        connect: {
+          userId,
+        },
+      },
+    },
+  });
+}
+export async function upsertStyleOfDance(
+  userId: Studio["userId"],
+  levelId: StyleOfDance["id"] | "new",
+  newName: StyleOfDance["name"],
+  levelDescription: StyleOfDance["description"] = null,
+) {
+  await prisma.skillLevel.upsert({
     where: {
       id: levelId,
     },

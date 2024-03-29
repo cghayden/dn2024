@@ -5,11 +5,18 @@ import { useEffect, useState } from "react";
 import { useForm } from "@conform-to/react";
 import { type action } from "../../routes/studio.settings.ResourceEditLevels";
 import DeleteLevel from "./DeleteLevel";
+import {
+  AgeLevelWithDanceClasses,
+  SkillLevelWithDanceClasses,
+  StyleOfDanceWithDanceClasses,
+} from "./ConfigItemList";
 
 type LevelEditableListProps = {
-  level?: AgeLevel | SkillLevel;
-  // levelType: 'skillLevel' | 'ageLevel'
-  levelType: string;
+  level?:
+    | AgeLevelWithDanceClasses
+    | SkillLevelWithDanceClasses
+    | StyleOfDanceWithDanceClasses;
+  levelType: "skillLevel" | "ageLevel" | "styleOfDance";
   inUse: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 };
@@ -20,7 +27,6 @@ export function UpsertLevelForm({
   formRef,
   inUse,
 }: LevelEditableListProps) {
-  console.log("level", level);
   const fetcher = useFetcher<typeof action>();
   const lastSubmission = fetcher?.data;
   let success = fetcher?.data;
@@ -89,7 +95,7 @@ export function UpsertLevelForm({
             </div>
           </div>
         </fetcher.Form>
-        <>
+        <div>
           {level ? (
             <DeleteLevel
               levelType={levelType}
@@ -97,7 +103,7 @@ export function UpsertLevelForm({
               inUse={inUse}
             />
           ) : null}
-        </>
+        </div>
       </td>
     </tr>
   );
