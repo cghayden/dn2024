@@ -73,7 +73,7 @@ model StyleOfDance {
   name    String
   studio  Studio       @relation(fields: [studioId], references: [userId])
   studioId String
-  classes DanceClass[]
+  danceClasses DanceClass[]
 }
 
 model DanceClass {

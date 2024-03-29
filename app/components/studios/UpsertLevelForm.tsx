@@ -10,6 +10,7 @@ type LevelEditableListProps = {
   level?: AgeLevel | SkillLevel;
   // levelType: 'skillLevel' | 'ageLevel'
   levelType: string;
+  inUse: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 };
 
@@ -17,6 +18,7 @@ export function UpsertLevelForm({
   level,
   levelType,
   formRef,
+  inUse,
 }: LevelEditableListProps) {
   console.log("level", level);
   const fetcher = useFetcher<typeof action>();
@@ -92,7 +94,7 @@ export function UpsertLevelForm({
             <DeleteLevel
               levelType={levelType}
               levelId={level.id}
-              inUse={level.danceClasses.length > 0}
+              inUse={inUse}
             />
           ) : null}
         </>

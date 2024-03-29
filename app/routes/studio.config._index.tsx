@@ -5,28 +5,16 @@ import ConfigItemList from "../components/studios/ConfigItemList";
 import StringArrayTable from "../components/studios/StringArrayTable";
 import type { AgeLevel, SkillLevel } from "@prisma/client";
 
-export type KeyedStyleOfDance = {
-  style: string;
-  key: string;
-};
-
-type LoaderData = {
-  ageLevels: AgeLevel[];
-  skillLevels: SkillLevel[];
-  stylesOfDance: KeyedStyleOfDance[];
-};
+// type LoaderData = {
+//   ageLevels: AgeLevel[];
+//   skillLevels: SkillLevel[];
+//   stylesOfDance: KeyedStyleOfDance[];
+// };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireStudioUserId(request);
   const config = await getStudioConfig(userId);
   if (!config) throw new Error("error loading config values");
-
-  const keyedStylesOfDance = config?.stylesOfDance.map((style) => {
-    return {
-      style: style,
-      key: crypto.randomUUID() as string,
-    };
-  });
 
   // const data: LoaderData = {
   //   ageLevels: config.ageLevels,
@@ -34,7 +22,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   //   stylesOfDance: keyedStylesOfDance,
   // };
 
-  return data;
+  return config;
 };
 
 export default function StudioConfigIndex() {
@@ -48,11 +36,11 @@ export default function StudioConfigIndex() {
         page="Skill Levels"
         data={skillLevels}
       />
-      <StringArrayTable
+      {/* <ConfigItemList
         itemType="styleOfDance"
         page="Styles of Dance"
         data={stylesOfDance}
-      />
+      /> */}
     </>
   );
 }

@@ -25,6 +25,18 @@ export default function DeleteLevel({
   //   }
   // }, [fetcher]);
 
+  const handleDelete = (event) => {
+    if (inUse) {
+      alert(
+        "This level cannot be deleted, as there are dance classes that are using it.  You can edit the level, or change all dance classes that use it to another level, and then delete it",
+      );
+    } else {
+      fetcher.submit(event.currentTarget.form, {
+        method: "POST",
+      });
+    }
+  };
+
   return (
     <>
       <fetcher.Form
@@ -38,6 +50,7 @@ export default function DeleteLevel({
         <button
           disabled={isDeleting}
           form={`delete${levelId}`}
+          onClick={() => handleDelete()}
           className="text-sm rounded bg-blue-500  text-white hover:bg-blue-600 focus:bg-blue-400  transition duration-150 ease-in-out ml-auto px-2 py-[2px] "
         >
           Delete

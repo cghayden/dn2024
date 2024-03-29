@@ -1,38 +1,47 @@
-import { useRef, useState } from 'react'
-import { UpsertLevelForm } from '~/components/studios/UpsertLevelForm'
-import { LevelList } from '~/components/studios/LevelList'
-import { ContentContainer } from '~/components/styledComponents/ContentContainer'
-import { TableHeader } from '~/components/styledComponents/TableHeader'
-import type { AgeLevel, SkillLevel } from '@prisma/client'
-import { cn } from '~/lib/tailwindUtils'
+import { useRef, useState } from "react";
+import { UpsertLevelForm } from "~/components/studios/UpsertLevelForm";
+import { LevelList } from "~/components/studios/LevelList";
+import { ContentContainer } from "~/components/styledComponents/ContentContainer";
+import { TableHeader } from "~/components/styledComponents/TableHeader";
+import { Prisma } from "@prisma/client";
+import { cn } from "~/lib/tailwindUtils";
+import { Config } from "tailwind-merge";
+import { Style } from "util";
+
+type AgeLevelWithDanceClasses = Prisma.AgeLevelGetPayload<{
+  include: { danceClasses: { select: { id: true } } };
+}>;
+type SkillLevelWithDanceClasses = Prisma.SkillLevelGetPayload<{
+  include: { danceClasses: { select: { id: true } } };
+}>;
 
 type ConfigItemListProps = {
-  data: AgeLevel[] | SkillLevel[]
-  page: 'Age Levels' | 'Skill Levels'
-  itemType: 'ageLevel' | 'skillLevel'
-}
+  data: AgeLevelWithDanceClasses[] | SkillLevelWithDanceClasses[];
+  page: "Age Levels" | "Skill Levels";
+  itemType: "ageLevel" | "skillLevel";
+};
 
 export default function ConfigItemList({
   data,
   page,
   itemType,
 }: ConfigItemListProps) {
-  const formRef = useRef<HTMLFormElement>(null)
-  const [editMode, toggleEditMode] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null);
+  const [editMode, toggleEditMode] = useState(false);
   return (
-    <div className='w-5/6 mx-auto mb-8'>
-      <TableHeader headerText={page} className=''>
-        <div className='text-right mb-2'>
+    <div className="w-5/6 mx-auto mb-8">
+      <TableHeader headerText={page} className="">
+        <div className="text-right mb-2">
           {editMode ? (
             <button
-              className='btn-noBg-cancel'
+              className="btn-noBg-cancel"
               onClick={() => toggleEditMode(!editMode)}
             >
               Close Edit Mode
             </button>
           ) : (
             <button
-              className='btn-noBg-action'
+              className="btn-noBg-action"
               onClick={() => toggleEditMode(!editMode)}
             >
               Edit / Add
@@ -48,21 +57,21 @@ export default function ConfigItemList({
 
       <ContentContainer
         className={cn({
-          ' border-rose-600': editMode === true,
-          ' border-transparent': editMode === false,
-          'w-full': true,
-          'border-2': true,
+          " border-rose-600": editMode === true,
+          " border-transparent": editMode === false,
+          "w-full": true,
+          "border-2": true,
         })}
       >
-        <table className='w-full'>
-          <thead className='block'>
-            <tr className='bg-gray-200 py-1 grid grid-cols-2 justify-items-start rounded-t-md'>
-              <th className='pl-2'>Name</th>
-              <th className='pl-2'>Description</th>
+        <table className="w-full">
+          <thead className="block">
+            <tr className="bg-gray-200 py-1 grid grid-cols-2 justify-items-start rounded-t-md">
+              <th className="pl-2">Name</th>
+              {<th className="pl-2">Description</th>}
             </tr>
           </thead>
           {!data.length && !editMode && (
-            <p className='text-center py-8'>
+            <p className="text-center py-8">
               You have no {page}. Click "edit/add to create
             </p>
           )}
@@ -74,10 +83,15 @@ export default function ConfigItemList({
                   key={level.id}
                   level={level}
                   levelType={itemType}
+                  inUse={level.danceClasses.length > 0}
                 />
               ))}
               {/* in edit provide a blank entry at the end of the list to enter a new level name and desc. */}
-              <UpsertLevelForm formRef={formRef} levelType={itemType} />
+              <UpsertLevelForm
+                formRef={formRef}
+                levelType={itemType}
+                inUse={false}
+              />
             </tbody>
           ) : (
             <LevelList levels={data} />
@@ -85,5 +99,5 @@ export default function ConfigItemList({
         </table>
       </ContentContainer>
     </div>
-  )
+  );
 }

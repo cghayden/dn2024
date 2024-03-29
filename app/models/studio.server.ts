@@ -105,7 +105,12 @@ export async function getDanceClasses_Name_Id(userId: User["userId"]) {
           name: true,
         },
       },
-      styleOfDance: true,
+      styleOfDance: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
     },
     orderBy: {
       ageLevel: {
@@ -194,12 +199,12 @@ export async function getStudioConfig(userId: User["userId"]) {
           id: true,
           name: true,
           description: true,
+          studioId: true,
           danceClasses: {
             select: {
               id: true,
             },
           },
-          studioId: true,
         },
       },
       skillLevels: {
@@ -207,17 +212,29 @@ export async function getStudioConfig(userId: User["userId"]) {
           id: true,
           name: true,
           description: true,
+          studioId: true,
           danceClasses: {
             select: {
               id: true,
             },
           },
+        },
+      },
+
+      stylesOfDance: {
+        select: {
+          id: true,
+          name: true,
           studioId: true,
+          danceClasses: {
+            select: {
+              id: true,
+            },
+          },
         },
       },
       tights: true,
       footwear: true,
-      stylesOfDance: true,
     },
   });
   return studio;
