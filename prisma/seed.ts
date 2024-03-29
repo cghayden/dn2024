@@ -7,7 +7,7 @@ async function seedStudios() {
   const skill_levels = ["Recreational", "Company"];
 
   const age_levels = [
-    { name: "First Steps", description: "3-4" },
+    // { name: "First Steps", description: "3-4" },
     { name: "Mini", description: "5-7" },
     { name: "Petite", description: "7-9" },
     { name: "Junior", description: "10-12" },
@@ -144,7 +144,6 @@ async function seedStudios() {
           studio: {
             create: {
               name: `Studio ${name}`,
-              stylesOfDance: stylesOfDance,
             },
           },
         },
@@ -153,16 +152,15 @@ async function seedStudios() {
       .then(async (user) => {
         console.log("new studio user:", user);
         console.log("seeding skill levels...");
-        for (const level of skill_levels) {
-          await prisma.skillLevel.upsert({
+        for (const style of stylesOfDance) {
+          await prisma.styleOfDance.upsert({
             where: {
-              id: `${user.email}-sl-${level}`,
+              id: `${user.email}-st-${style}`,
             },
             update: {},
             create: {
-              id: `${user.email}-sl-${level}`,
-              description: "",
-              name: level,
+              id: `${user.email}-sl-${style}`,
+              name: style,
               studio: {
                 connect: {
                   userId: user.userId,
@@ -236,7 +234,7 @@ async function seedStudios() {
       });
   }
 
-  console.log(`Database has been seeded. 🌱`);
+  console.log(`Database has been seeded with Studios. 🌱`);
 }
 
 seedStudios()

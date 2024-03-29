@@ -28,11 +28,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     };
   });
 
-  const data: LoaderData = {
-    ageLevels: config.ageLevels,
-    skillLevels: config.skillLevels,
-    stylesOfDance: keyedStylesOfDance,
-  };
+  // const data: LoaderData = {
+  //   ageLevels: config.ageLevels,
+  //   skillLevels: config.skillLevels,
+  //   stylesOfDance: keyedStylesOfDance,
+  // };
 
   return data;
 };
