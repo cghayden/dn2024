@@ -7,6 +7,7 @@ import type {
   SkillLevel,
   Tights,
   Footwear,
+  StyleOfDance,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -15,6 +16,7 @@ import { requireUserId } from "~/session.server";
 import { getUserById } from "./user.server";
 import { redirect } from "@remix-run/node";
 import { T } from "vitest/dist/reporters-5f784f42";
+import { Style } from "node:util";
 
 export async function requireParentUserId(request: Request) {
   // check for UserId - if none, no one is logged in, redirect to /welcome
@@ -63,6 +65,7 @@ export async function createParentCustomDance({
   recital,
   tightsId,
   footwearId,
+  styleOfDanceId,
 }: {
   name: DanceClass["name"];
   performanceName?: DanceClass["performanceName"];
@@ -74,6 +77,7 @@ export async function createParentCustomDance({
   recital: DanceClass["recital"];
   tightsId?: Tights["id"];
   footwearId?: Footwear["id"];
+  styleOfDanceId: StyleOfDance["id"];
 }) {
   return prisma.danceClass.create({
     data: {
@@ -87,6 +91,7 @@ export async function createParentCustomDance({
       recital,
       tightsId,
       footwearId,
+      styleOfDanceId,
     },
   });
 }

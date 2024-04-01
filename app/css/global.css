@@ -17,7 +17,7 @@ body {
   background-color: #fff;
   padding: 1rem;
   border-radius: 0.375rem;
-  font-family: 'Inter', Roboto;
+  font-family: "Inter", Roboto;
   margin: auto;
   color: dimgray;
   max-width: 700px;
@@ -33,11 +33,11 @@ body {
   margin: 0;
 }
 
-.levels_edit {
+/* .levels_edit {
   display: grid;
   grid-template-columns: 1fr 1fr max-content;
   gap: 10px;
-}
+} */
 
 .levels_edit div:not(:last-child) {
   margin-left: 10px;

@@ -49,7 +49,7 @@ model Dancer {
   parentId      String
   enrollments   Enrollment[]
   imageFilename String?
-  Studio        Studio[]
+  studio        Studio[]
 }
 
 model Studio {
@@ -63,8 +63,8 @@ model Studio {
   skillLevels   SkillLevel[] //studio defined skill levels. (e.g. recreational, company, rising star, excel, etc.)
   tights        Tights[]
   footwear      Footwear[]
-  stylesOfDance String[]
-  Dancer        Dancer?      @relation(fields: [dancerId], references: [id])
+  stylesOfDance StyleOfDance[]
+  dancer        Dancer?      @relation(fields: [dancerId], references: [id])
   dancerId      String? // WHY is this there a singular Dancer relation??
 }
 
@@ -72,7 +72,8 @@ model DanceClass {
   id              String       @id @default(uuid())
   name            String
   performanceName String?
-  styleOfDance    String?
+  styleOfDance    StyleOfDance @relation(fields: [styleOfDanceId], references: [id])
+  styleOfDanceId    String
   footwear        Footwear?    @relation(fields: [footwearId], references: [id])
   footwearId      String?
   tights          Tights?      @relation(fields: [tightsId], references: [id])
@@ -155,6 +156,15 @@ model AgeLevel {
   description  String?
   studio       Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
   studioId     String
+  danceClasses DanceClass[]
+}
+
+model StyleOfDance {
+  id      String       @id @default(uuid())
+  name    String
+  description String?
+  studio  Studio       @relation(fields: [studioId], references: [userId], onDelete: Cascade)
+  studioId String
   danceClasses DanceClass[]
 }
 
