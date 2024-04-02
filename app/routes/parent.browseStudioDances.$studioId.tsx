@@ -2,71 +2,71 @@ import {
   type ActionFunctionArgs,
   json,
   type LoaderFunctionArgs,
-} from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { useState } from 'react'
-import BrowseStudioDanceListing from '~/components/parents/BrowseStudioDanceListing'
-import { PageHeader } from '~/components/styledComponents/PageHeader'
-import { getDancersForEnrollment } from '~/models/dancer.server'
+} from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { useState } from "react";
+import BrowseStudioDanceListing from "~/components/parents/BrowseStudioDanceListing";
+import { PageHeader } from "~/components/styledComponents/PageHeader";
+import { getDancersForEnrollment } from "~/models/dancer.server";
 import {
   enrollDancerInDanceClass,
   getStudioDancesToBrowse,
-} from '~/models/studio.server'
-import { getUserId } from '~/session.server'
+} from "~/models/studio.server";
+import { getUserId } from "~/session.server";
 
 export type FormattedDancer = {
-  id: string
-  firstName: string
+  id: string;
+  firstName: string;
   // birthdate: Date | null
-  enrollments: string[] // Now just an array of strings
-}
+  enrollments: string[]; // Now just an array of strings
+};
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData()
-  const danceClassId = formData.get('danceClassId')
-  const studioId = formData.get('studioId')
-  const dancerId = formData.get('dancerId')
+  const formData = await request.formData();
+  const danceClassId = formData.get("danceClassId");
+  const studioId = formData.get("studioId");
+  const dancerId = formData.get("dancerId");
 
-  if (!danceClassId || typeof danceClassId !== 'string') {
-    return { error: `incorrect danceClassId provided ` }
+  if (!danceClassId || typeof danceClassId !== "string") {
+    return { error: `incorrect danceClassId provided ` };
   }
-  if (!dancerId || typeof dancerId !== 'string') {
-    return { error: `incorrect dancerId provided ` }
+  if (!dancerId || typeof dancerId !== "string") {
+    return { error: `incorrect dancerId provided ` };
   }
-  if (!studioId || typeof studioId !== 'string') {
-    return { error: `incorrect studioId provided ` }
+  if (!studioId || typeof studioId !== "string") {
+    return { error: `incorrect studioId provided ` };
   }
 
   const enrollment = await enrollDancerInDanceClass({
     danceClassId,
     dancerId,
     studioId,
-  })
+  });
 
-  return json(enrollment)
-}
+  return json(enrollment);
+};
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  const userId = await getUserId(request)
-  const studioId = params.studioId
+  const userId = await getUserId(request);
+  const studioId = params.studioId;
   if (!studioId || !userId) {
-    throw new Error('no studio Id or no User Id  provided')
+    throw new Error("no studio Id or no User Id  provided");
   }
 
-  const dancers = await getDancersForEnrollment(userId)
+  const dancers = await getDancersForEnrollment(userId);
 
   // change array of enrollment objects to array of enrollment ids:
   const formattedDancers: FormattedDancer[] = dancers.map((dancer) => ({
     ...dancer, // Spread the original dancer properties
     enrollments: dancer.enrollments.map((enrollment) => enrollment.classId), // Transform to array of strings
-  }))
+  }));
 
-  const studio = await getStudioDancesToBrowse({ studioId })
+  const studio = await getStudioDancesToBrowse({ studioId });
   if (!studio) {
-    throw new Error('could studio could not be found')
+    throw new Error("could studio could not be found");
   }
-  return { studio, formattedDancers, studioId }
-}
+  return { studio, formattedDancers, studioId };
+};
 
 // dance name
 // dance time
@@ -82,16 +82,16 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 // change UI to indicate requested
 
 export default function BrowseStudioDances() {
-  const { studio, formattedDancers, studioId } = useLoaderData<typeof loader>()
-  const [activeDancerId, setActiveDancerId] = useState(formattedDancers[0].id)
+  const { studio, formattedDancers, studioId } = useLoaderData<typeof loader>();
+  const [activeDancerId, setActiveDancerId] = useState(formattedDancers[0].id);
 
   const activeDancer =
     formattedDancers.find((dancer) => dancer.id === activeDancerId) ||
-    formattedDancers[0]
+    formattedDancers[0];
 
   return (
     <>
-      <PageHeader headerText={`Classes at ${studio?.name}`} />
+      <PageHeader headerText={`Classes at ${studio?.name}, ${studio.userId}`} />
 
       {/* 
 // studio name
@@ -99,8 +99,8 @@ export default function BrowseStudioDances() {
 // studio website
 // studio about
 // studio image(s) */}
-      <div className='w-4/5 max-w-[600px] mx-auto min-w-[300px]'>
-        <div className='w-full flex justify-center gap-8 m-4'>
+      <div className="w-4/5 max-w-[600px] mx-auto min-w-[300px]">
+        <div className="w-full flex justify-center gap-8 m-4">
           {formattedDancers.map((dancer) => (
             <button
               key={dancer.id}
@@ -108,8 +108,8 @@ export default function BrowseStudioDances() {
             
             ${
               activeDancer.id === dancer.id
-                ? 'btn-action text-white'
-                : 'bg-slate-300'
+                ? "btn-action text-white"
+                : "bg-slate-300"
             }
             `}
               onClick={() => setActiveDancerId(dancer.id)}
@@ -118,7 +118,7 @@ export default function BrowseStudioDances() {
             </button>
           ))}
         </div>
-        <ul className='flex flex-col items-center'>
+        <ul className="flex flex-col items-center">
           {studio.danceClasses.map((dance) => (
             <BrowseStudioDanceListing
               key={dance.id}
@@ -130,5 +130,5 @@ export default function BrowseStudioDances() {
         </ul>
       </div>
     </>
-  )
+  );
 }

@@ -75,7 +75,7 @@ export function generateStudioDanceData(studio: StudioForSeeding) {
           // const styleOfDanceId =
           //   stylesOfDance[Math.floor(Math.random() * stylesOfDance.length)].id;
           danceClasses.push({
-            name: `${ageLevel.name} ${skillLevel.name} ${style} `,
+            name: `${ageLevel.name} ${skillLevel.name} ${style.name} `,
             ageLevelId: ageLevel.id,
             skillLevelId: skillLevel.id,
             tightsId: tightsId,

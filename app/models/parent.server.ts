@@ -17,6 +17,7 @@ import { getUserById } from "./user.server";
 import { redirect } from "@remix-run/node";
 import { T } from "vitest/dist/reporters-5f784f42";
 import { Style } from "node:util";
+import { AsyncReturnType } from "type-fest";
 
 export async function requireParentUserId(request: Request) {
   // check for UserId - if none, no one is logged in, redirect to /welcome
@@ -28,6 +29,20 @@ export async function requireParentUserId(request: Request) {
     throw redirect(`/`);
   }
   return userId;
+}
+
+// return logged in parent without password
+export async function getParentUser(request: Request) {
+  // check for UserId on session - if none, no one is logged in, redirect to /welcome
+  const userId = await requireUserId(request);
+
+  // get User, check user type for 'STUDIO'
+  const userWithPassword = await getUserById(userId);
+  if (!userWithPassword || userWithPassword?.type !== "PARENT") {
+    throw redirect(`/`);
+  }
+  const { password: _password, ...userWithoutPassword } = userWithPassword;
+  return userWithoutPassword;
 }
 
 export async function createParent(
@@ -53,6 +68,28 @@ export async function createParent(
     },
   });
 }
+
+export async function getParentNavData(parentId: string) {
+  const parentNavData = await prisma.parent.findUnique({
+    where: {
+      userId: parentId,
+    },
+    select: {
+      userId: true,
+      firstName: true,
+      lastName: true,
+      dancers: {
+        select: {
+          firstName: true,
+          id: true,
+        },
+      },
+    },
+  });
+  return parentNavData;
+}
+
+export type ParentNavData = AsyncReturnType<typeof getParentNavData>;
 
 export async function createParentCustomDance({
   name,

@@ -15,6 +15,7 @@ import { requireUserId } from "~/session.server";
 import { getUserById } from "./user.server";
 import { redirect } from "@remix-run/node";
 import type { DeleteItem } from "types";
+import { AsyncReturnType } from "type-fest";
 // import { select } from 'node_modules/@conform-to/react/helpers'
 
 // return logged in studio without password
@@ -30,6 +31,8 @@ export async function requireStudio(request: Request) {
   const { password: _password, ...userWithoutPassword } = userWithPassword;
   return userWithoutPassword;
 }
+
+export type RequireStudio = AsyncReturnType<typeof requireStudio>;
 
 // return logged in Studio UserId
 export async function requireStudioUserId(request: Request) {
@@ -329,6 +332,7 @@ export async function getStudioDancesToBrowse({
       userId: studioId,
     },
     select: {
+      userId: true,
       name: true,
       danceClasses: {
         select: {

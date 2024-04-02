@@ -27,7 +27,7 @@ export default function BrowseStudioDanceListing({
   const isEnrolled = dancer.enrollments.includes(danceClass.id);
 
   return (
-    <li className="flex p-4 m-4 w-full">
+    <li className="flex m-2 w-full">
       <ContentContainer
         className={`p-4 w-full ${isEnrolled && "bg-slate-200"}`}
       >
