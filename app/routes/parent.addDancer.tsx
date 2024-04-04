@@ -17,7 +17,7 @@ import ReactDatePicker from "react-datepicker";
 import datePickerStyles from "react-datepicker/dist/react-datepicker.css";
 import { normalizeDate } from "~/lib/normalizeDate";
 
-// @ts-expect-error otherwise it doesn't work
+// @ts-expect-error
 const DatePicker = ReactDatePicker.default;
 
 export const links: LinksFunction = () => [
@@ -97,7 +97,7 @@ export default function AddDancer() {
             </div> */}
           </div>
 
-          <div>
+          {/* <div>
             <div className="input_item">
               <label className="block">Birthdate:</label>
               <DatePicker
@@ -109,7 +109,7 @@ export default function AddDancer() {
                 dropdownMode="select"
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="pt-4">
             <button

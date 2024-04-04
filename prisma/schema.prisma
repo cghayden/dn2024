@@ -49,7 +49,6 @@ model Dancer {
   parentId      String
   enrollments   Enrollment[]
   imageFilename String?
-  studio        Studio[]
 }
 
 model Studio {
@@ -64,8 +63,6 @@ model Studio {
   tights        Tights[]
   footwear      Footwear[]
   stylesOfDance StyleOfDance[]
-  dancer        Dancer?      @relation(fields: [dancerId], references: [id])
-  dancerId      String? // WHY is this there a singular Dancer relation??
 }
 
 model DanceClass {
@@ -100,8 +97,8 @@ model Enrollment {
   id        String     @id @default(uuid())
   dancer    Dancer     @relation(fields: [dancerId], references: [id], onDelete: Cascade)
   dancerId  String
-  class     DanceClass @relation(fields: [classId], references: [id], onDelete: Cascade)
-  classId   String
+  danceClass     DanceClass @relation(fields: [danceClassId], references: [id], onDelete: Cascade)
+  danceClassId   String
   studio    Studio     @relation(fields: [studioId], references: [userId], onDelete: Cascade)
   studioId  String
   requested DateTime?  @default(now())

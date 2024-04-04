@@ -72,8 +72,6 @@ export function generateStudioDanceData(studio: StudioForSeeding) {
           const tightsId = tights[Math.floor(Math.random() * tights.length)].id;
           const footwearId =
             footwear[Math.floor(Math.random() * footwear.length)].id;
-          // const styleOfDanceId =
-          //   stylesOfDance[Math.floor(Math.random() * stylesOfDance.length)].id;
           danceClasses.push({
             name: `${ageLevel.name} ${skillLevel.name} ${style.name} `,
             ageLevelId: ageLevel.id,
@@ -94,7 +92,7 @@ export function generateStudioDanceData(studio: StudioForSeeding) {
         //   stylesOfDance[Math.floor(Math.random() * stylesOfDance.length)].id;
 
         danceClasses.push({
-          name: `${ageLevel.name} Recreational ${style}`,
+          name: `${ageLevel.name} Recreational ${style.name}`,
           ageLevelId: ageLevel.id,
           skillLevelId: defaultSkillLevel.id,
           styleOfDanceId: style.id,
