@@ -167,8 +167,8 @@ model StyleOfDance {
 
 model Schedule {
   id        String     @id @default(uuid())
-  class     DanceClass @relation(fields: [classId], references: [id], onDelete: Cascade)
-  classId   String
+  class     DanceClass @relation(fields: [danceClassId], references: [id], onDelete: Cascade)
+  danceClassId   String
   startTime DateTime
   endTime   DateTime
   dayOfWeek String

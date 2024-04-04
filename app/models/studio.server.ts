@@ -378,7 +378,7 @@ export async function getStudioDancers(studioId: Studio["userId"]) {
         where: {
           studioId: studioId,
         },
-        select: { studioId: true, class: { select: { name: true } } },
+        select: { studioId: true, danceClass: { select: { name: true } } },
       },
     },
   });
@@ -419,8 +419,8 @@ export async function upsertStudioFootwear({
   imageFilename?: Footwear["imageFilename"];
   danceClassIds: string[];
 }) {
-  const danceClassConnector = danceClassIds.map((classId) => {
-    return { id: classId };
+  const danceClassConnector = danceClassIds.map((danceClassId) => {
+    return { id: danceClassId };
   });
   return await prisma.footwear.upsert({
     where: {
@@ -483,8 +483,8 @@ export async function upsertStudioTights({
   imageFilename?: Tights["imageFilename"];
   danceClassIds: string[];
 }) {
-  const danceClassConnector = danceClassIds.map((classId) => {
-    return { id: classId };
+  const danceClassConnector = danceClassIds.map((danceClassId) => {
+    return { id: danceClassId };
   });
   return await prisma.tights.upsert({
     where: {
@@ -703,7 +703,7 @@ export async function enrollDancerInDanceClass({
   return await prisma.enrollment.create({
     data: {
       dancerId,
-      classId: danceClassId,
+      danceClassId: danceClassId,
       studioId: studioId,
     },
   });

@@ -1,5 +1,5 @@
-import type { Dancer, User } from '@prisma/client'
-import { prisma } from '~/db.server'
+import type { Dancer, User } from "@prisma/client";
+import { prisma } from "~/db.server";
 
 export async function createParentDancer({
   firstName,
@@ -7,10 +7,10 @@ export async function createParentDancer({
   userId,
   birthdate,
 }: {
-  firstName: Dancer['firstName']
-  lastName: Dancer['lastName']
-  userId: User['userId']
-  birthdate: Dancer['birthdate']
+  firstName: Dancer["firstName"];
+  lastName: Dancer["lastName"];
+  userId: User["userId"];
+  birthdate: Dancer["birthdate"];
 }) {
   return await prisma.dancer.create({
     data: {
@@ -23,43 +23,43 @@ export async function createParentDancer({
         },
       },
     },
-  })
+  });
 }
 
-export async function raw_getDancer({ dancerId }: { dancerId: Dancer['id'] }) {
+export async function raw_getDancer({ dancerId }: { dancerId: Dancer["id"] }) {
   const dancer = await prisma.$queryRaw`
    
-  `
-  return dancer
+  `;
+  return dancer;
 }
 
 export async function raw_getDancers() {
   const dancers = await prisma.$queryRaw`
-    SELECT * FROM User`
-  return dancers
+    SELECT * FROM User`;
+  return dancers;
 }
 
 export async function updateDancer(
-  dancerId: Dancer['id'],
-  data: Partial<Dancer>
+  dancerId: Dancer["id"],
+  data: Partial<Dancer>,
 ) {
   return await prisma.dancer.update({
     where: {
       id: dancerId,
     },
     data: data,
-  })
+  });
 }
 
-export async function getDancers_Id_Name(userId: User['userId']) {
+export async function getDancers_Id_Name(userId: User["userId"]) {
   const dancersNames = await prisma.dancer.findMany({
     where: { parentId: userId },
     select: { firstName: true, id: true },
-  })
-  return dancersNames
+  });
+  return dancersNames;
 }
 
-export async function getDancersForEnrollment(userId: User['userId']) {
+export async function getDancersForEnrollment(userId: User["userId"]) {
   const dancersNames = await prisma.dancer.findMany({
     where: { parentId: userId },
     select: {
@@ -68,19 +68,19 @@ export async function getDancersForEnrollment(userId: User['userId']) {
       birthdate: true,
       enrollments: {
         select: {
-          classId: true,
+          danceClassId: true,
         },
       },
     },
-  })
-  return dancersNames
+  });
+  return dancersNames;
 }
 
-export const getDancer = async (dancerId: Dancer['id']) => {
+export const getDancer = async (dancerId: Dancer["id"]) => {
   const dancer = await prisma.dancer.findUnique({
     where: {
       id: dancerId,
     },
-  })
-  return dancer
-}
+  });
+  return dancer;
+};

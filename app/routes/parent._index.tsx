@@ -94,7 +94,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function ParentIndex() {
   const { parent, danceClasses, enrollments } = useLoaderData<typeof loader>();
-  console.log("parent danceClasses", danceClasses);
+  console.log("enrollments", enrollments);
+  // console.log("parent danceClasses", danceClasses);
   if (!parent.dancers.length) {
     return (
       <div>

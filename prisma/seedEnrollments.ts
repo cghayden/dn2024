@@ -50,7 +50,7 @@ export async function seedEnrollments(prisma: PrismaClient) {
     }),
   );
 
-  console.log("ennrolments seeded. totalEnrollments:", totalEnrollments);
+  console.log("enrollments seeded. totalEnrollments:", totalEnrollments);
 }
 
 async function main() {
@@ -146,7 +146,7 @@ async function main() {
 //         await prisma.enrollment.create({
 //           data: {
 //             dancerId: randomDancer.id,
-//             classId: danceClass.id,
+//             danceClassId: danceClass.id,
 //             studioId: danceClass.studioId,
 //           },
 //         })

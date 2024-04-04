@@ -58,7 +58,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // change array of enrollment objects to array of enrollment ids:
   const formattedDancers: FormattedDancer[] = dancers.map((dancer) => ({
     ...dancer, // Spread the original dancer properties
-    enrollments: dancer.enrollments.map((enrollment) => enrollment.classId), // Transform to array of strings
+    enrollments: dancer.enrollments.map(
+      (enrollment) => enrollment.danceClassId,
+    ), // Transform to array of strings
   }));
 
   const studio = await getStudioDancesToBrowse({ studioId });
