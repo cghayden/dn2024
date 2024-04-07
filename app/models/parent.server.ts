@@ -132,3 +132,33 @@ export async function createParentCustomDance({
     },
   });
 }
+
+export async function getDanceClass({
+  danceClassId,
+  parentId,
+}: {
+  danceClassId: DanceClass["id"];
+  parentId: Parent["userId"];
+}) {
+  const danceClass = prisma.danceClass.findUnique({
+    where: {
+      id: danceClassId,
+    },
+    include: {
+      // name: true,
+      // performanceName: true,
+      studio: true,
+      tights: true,
+      footwear: true,
+      styleOfDance: true,
+      enrollments: {
+        where: {
+          dancer: {
+            parentId: parentId,
+          },
+        },
+      },
+    },
+  });
+  return danceClass;
+}

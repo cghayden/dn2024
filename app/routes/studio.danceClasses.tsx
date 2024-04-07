@@ -1,19 +1,17 @@
+import { useEffect, useState } from "react";
 import { type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { requireStudioUserId } from "~/models/studio.server";
+import { getSkillLevels, requireStudioUserId } from "~/models/studio.server";
 import { prisma } from "~/db.server";
 import StudioFilter from "~/components/studios/StudioFilter";
-import { useEffect, useState } from "react";
-
 import DancesPageDanceListings from "~/components/studios/DancesPageDanceListings";
 import ActiveFilterDisplay from "~/components/ActiveFilterDisplay";
-import { Style } from "util";
-import { StyleOfDance } from "@prisma/client";
 
 export type Filters = {
   ageLevel: string[];
   tights: string[];
   stylesOfDance: string[];
+  skillLevels: string[];
 };
 
 export type DanceListingType = {
@@ -26,6 +24,7 @@ export type DanceListingType = {
     name: string;
   };
   styleOfDance: { name: string };
+  skillLevel: { name: string };
 };
 
 export type LoaderType = {
@@ -43,6 +42,10 @@ export type LoaderType = {
       id: string;
       name: string;
     }[];
+    skillLevels: {
+      id: string;
+      name: string;
+    }[];
   };
 };
 
@@ -55,6 +58,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     select: {
       id: true,
       name: true,
+      competitionEntryNumber: true,
+      competitions: true,
       ageLevel: {
         select: {
           name: true,
@@ -66,6 +71,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         },
       },
       tights: {
+        select: {
+          name: true,
+        },
+      },
+      skillLevel: {
         select: {
           name: true,
         },
@@ -96,6 +106,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
           name: true,
         },
       },
+      skillLevels: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -105,11 +121,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function DanceClasses() {
   const { dances, filterData } = useLoaderData<typeof loader>();
+  console.log("dances", dances);
 
   const [filters, setFilters] = useState<Filters>({
     ageLevel: [],
     tights: [],
     stylesOfDance: [],
+    skillLevels: [],
   });
 
   const [filteredDances, setFilteredDances] = useState<
@@ -127,7 +145,9 @@ export default function DanceClasses() {
               filters.tights.includes(dance.tights.name))) &&
           (filters.stylesOfDance.length === 0 ||
             (dance.styleOfDance?.name &&
-              filters.stylesOfDance.includes(dance.styleOfDance.name))),
+              filters.stylesOfDance.includes(dance.styleOfDance.name))) &&
+          (filters.skillLevels.length === 0 ||
+            filters.skillLevels.includes(dance.skillLevel.name)),
       );
       setFilteredDances(result);
     };
@@ -143,7 +163,7 @@ export default function DanceClasses() {
           danceClasses={filteredDances ? filteredDances : dances}
         />
       </div>
-      <div className="w-[200px] bg-slate-300 h-full">
+      <div className="h-full w-[200px] bg-slate-300">
         {filterData && (
           <StudioFilter
             categories={filterData}

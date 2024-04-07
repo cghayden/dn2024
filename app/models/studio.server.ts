@@ -264,6 +264,11 @@ export async function getDanceClass({
       competitions: true,
       recital: true,
       styleOfDanceId: true,
+      competitionName: true,
+      competitionEntryDayOfWeek: true,
+      competitionEntryNumber: true,
+      competitionEntryTime: true,
+      notes: true,
       enrollments: {
         distinct: "dancerId",
         select: {

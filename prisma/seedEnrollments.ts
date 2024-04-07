@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 // By using Promise.all along with map, you ensure that the timer is stopped only after all the asynchronous operations inside the mapping are fully completed, giving you an accurate measurement of the execution time.
 
 export async function seedEnrollments(prisma: PrismaClient) {
+  console.log("seeding enrollments...");
   let totalEnrollments = 0;
 
   const dancers = await prisma.dancer.findMany({
@@ -28,25 +29,24 @@ export async function seedEnrollments(prisma: PrismaClient) {
 
   await Promise.all(
     dancers.map(async (dancer) => {
-      let numberOfClassesToEnroll = 5;
       const studio =
         filteredStudios[Math.floor(Math.random() * filteredStudios.length)];
       const studioClasses = studio.danceClasses;
-
-      while (numberOfClassesToEnroll > 0) {
-        // pick a dance class and enroll
-        const randomDanceClass =
-          studioClasses[Math.floor(Math.random() * studioClasses.length)];
-        await prisma.enrollment.create({
-          data: {
-            dancerId: dancer.id,
-            danceClassId: randomDanceClass.id,
-            studioId: studio.userId,
-          },
+      let classesToEnroll = [];
+      while (classesToEnroll.length < 5) {
+        const randomIndex = Math.floor(Math.random() * studioClasses.length);
+        const danceClass = studioClasses[randomIndex];
+        classesToEnroll.push({
+          dancerId: dancer.id,
+          danceClassId: danceClass.id,
+          studioId: studio.userId,
         });
-        totalEnrollments++;
-        numberOfClassesToEnroll--;
+        studioClasses.splice(randomIndex, 1);
       }
+
+      await prisma.enrollment.createMany({
+        data: classesToEnroll,
+      });
     }),
   );
 

@@ -4,6 +4,7 @@ type FilterCategories = {
   ageLevels: { id: string; name: string }[];
   tights: { id: string; name: string }[];
   stylesOfDance: { id: string; name: string }[];
+  skillLevels: { id: string; name: string }[];
 };
 
 export default function StudioFilter({
@@ -32,10 +33,35 @@ export default function StudioFilter({
 
   return (
     <>
-      <h3 className="font-bold text-lg text-center py-4">Filters</h3>
+      <h3 className="py-4 text-center text-lg font-bold">Filters</h3>
       <div>
+        <div>
+          <legend className="pb-4 pl-4">Skill Levels</legend>
+          <ul>
+            {categories.skillLevels.map((skillLevel) => (
+              <li key={skillLevel.id}>
+                <label>
+                  <input
+                    name={skillLevel.name}
+                    type="checkbox"
+                    value={skillLevel.name}
+                    checked={filters.skillLevels?.includes(skillLevel.name)}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        "skillLevels",
+                        skillLevel.name,
+                        e.target.checked,
+                      )
+                    }
+                  />
+                  {skillLevel.name}
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
         <div className="my-6">
-          <legend className="pl-4 pb-4">Age Levels</legend>
+          <legend className="pb-4 pl-4">Age Levels</legend>
           <ul className="pl-6">
             {categories.ageLevels.map((ageLevel) => (
               <li key={ageLevel.id}>
@@ -60,7 +86,7 @@ export default function StudioFilter({
           </ul>
         </div>
         <div className="my-6">
-          <legend className="pl-4 pb-4">Style</legend>
+          <legend className="pb-4 pl-4">Style</legend>
           <ul>
             {categories.stylesOfDance.map((style) => (
               <li key={style.id}>
@@ -85,7 +111,7 @@ export default function StudioFilter({
           </ul>
         </div>
         <div className="my-6">
-          <legend className="pl-4 pb-4">Tights</legend>
+          <legend className="pb-4 pl-4">Tights</legend>
           <ul>
             {categories.tights.map((tightsItem) => (
               <li key={tightsItem.id}>
