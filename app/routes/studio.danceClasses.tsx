@@ -149,8 +149,23 @@ export default function DanceClasses() {
             (dance.styleOfDance?.name &&
               filters.stylesOfDance.includes(dance.styleOfDance.name))) &&
           (filters.skillLevels.length === 0 ||
-            filters.skillLevels.includes(dance.skillLevel.name)),
+            filters.skillLevels.includes(dance.skillLevel.name)) &&
+          (filters.competitionView === true
+            ? dance.competitionEntryNumber
+              ? true
+              : false
+            : true),
       );
+
+      if (filters.competitionView) {
+        const orderedByCompetitonEntryNumber = result.sort(
+          (a, b) =>
+            parseInt(a.competitionEntryNumber!) -
+            parseInt(b.competitionEntryNumber!),
+        );
+        setFilteredDances(orderedByCompetitonEntryNumber);
+        return;
+      }
       setFilteredDances(result);
     };
 
