@@ -132,3 +132,22 @@ body {
   align-items: stretch;
   justify-content: stretch;
 }
+
+.filterCategoryWrapper {
+  margin: 1rem 0;
+}
+
+.filterCategoryWrapper legend {
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  font-weight: bold;
+}
+.filterCategoryWrapper ul {
+  padding-left: 1.25rem;
+}
+.filterCategoryWrapper ul label {
+  font-size: 0.9rem;
+}
+.filterCategoryWrapper ul li input[type="checkbox"] {
+  margin-right: 0.5rem;
+}

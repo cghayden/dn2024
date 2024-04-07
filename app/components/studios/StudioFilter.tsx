@@ -35,8 +35,8 @@ export default function StudioFilter({
     <>
       <h3 className="py-4 text-center text-lg font-bold">Filters</h3>
       <div>
-        <div>
-          <legend className="pb-4 pl-4">Skill Levels</legend>
+        <div className="filterCategoryWrapper">
+          <legend>Skill Levels</legend>
           <ul>
             {categories.skillLevels.map((skillLevel) => (
               <li key={skillLevel.id}>
@@ -60,9 +60,9 @@ export default function StudioFilter({
             ))}
           </ul>
         </div>
-        <div className="my-6">
+        <div className="filterCategoryWrapper">
           <legend className="pb-4 pl-4">Age Levels</legend>
-          <ul className="pl-6">
+          <ul>
             {categories.ageLevels.map((ageLevel) => (
               <li key={ageLevel.id}>
                 <label>
@@ -85,7 +85,7 @@ export default function StudioFilter({
             ))}
           </ul>
         </div>
-        <div className="my-6">
+        <div className="filterCategoryWrapper">
           <legend className="pb-4 pl-4">Style</legend>
           <ul>
             {categories.stylesOfDance.map((style) => (
@@ -110,7 +110,7 @@ export default function StudioFilter({
             ))}
           </ul>
         </div>
-        <div className="my-6">
+        <div className="filterCategoryWrapper">
           <legend className="pb-4 pl-4">Tights</legend>
           <ul>
             {categories.tights.map((tightsItem) => (

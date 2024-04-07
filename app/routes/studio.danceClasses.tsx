@@ -121,7 +121,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function DanceClasses() {
   const { dances, filterData } = useLoaderData<typeof loader>();
-  console.log("dances", dances);
 
   const [filters, setFilters] = useState<Filters>({
     ageLevel: [],
