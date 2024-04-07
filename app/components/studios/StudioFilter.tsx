@@ -41,9 +41,10 @@ export default function StudioFilter({
   return (
     <>
       <h3 className="py-4 text-center text-lg font-bold">Filters</h3>
-      <div>
-        <label>
+      <div className="pl-5">
+        <label className="text-sm">
           <input
+            className="mr-2 "
             name="CompetitionView"
             type="checkbox"
             value="CompetitionView"
