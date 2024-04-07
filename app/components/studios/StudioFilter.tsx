@@ -21,9 +21,16 @@ export default function StudioFilter({
     name: string,
     isChecked: boolean,
   ) => {
-    const newFilterValues = isChecked
-      ? [...filters[category], name] // Add id
-      : filters[category].filter((value) => value !== name); // Remove id
+    let newFilterValues;
+
+    if (category === "competitionView") {
+      // If the category is 'competitionView', set the filter value to isChecked directly
+      newFilterValues = isChecked;
+    } else {
+      newFilterValues = isChecked
+        ? [...filters[category], name] // Add id
+        : filters[category].filter((value) => value !== name); // Remove id
+    }
 
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -34,6 +41,20 @@ export default function StudioFilter({
   return (
     <>
       <h3 className="py-4 text-center text-lg font-bold">Filters</h3>
+      <div>
+        <label>
+          <input
+            name="CompetitionView"
+            type="checkbox"
+            value="CompetitionView"
+            checked={filters.competitionView}
+            onChange={(e) =>
+              handleFilterChange("competitionView", "", e.target.checked)
+            }
+          />
+          Competition View
+        </label>
+      </div>
       <div>
         <div className="filterCategoryWrapper">
           <legend>Skill Levels</legend>
