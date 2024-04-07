@@ -160,7 +160,7 @@ export default function DanceClasses() {
   return (
     <div className="flex h-[100vh]">
       <div className="flex-1">
-        {/* <ActiveFilterDisplay filters={filters} /> */}
+        <ActiveFilterDisplay filters={filters} />
         <DancesPageDanceListings
           danceClasses={filteredDances ? filteredDances : dances}
         />
