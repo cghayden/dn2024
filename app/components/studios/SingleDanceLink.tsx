@@ -3,7 +3,7 @@ import { Link } from "@remix-run/react";
 
 type DanceListingProps = Partial<DanceClass>;
 
-export function DanceListing({
+export function SingleDanceLink({
   danceClass,
 }: {
   danceClass: DanceListingProps;

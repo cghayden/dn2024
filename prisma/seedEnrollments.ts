@@ -1,9 +1,20 @@
-import { PrismaClient } from "@prisma/client";
+import {
+  DanceClass,
+  Dancer,
+  Enrollment,
+  PrismaClient,
+  Studio,
+} from "@prisma/client";
 const prisma = new PrismaClient();
 //Proper implementation uses .map to loop over array and perform async functin on each item:
 // use array.map wrapped in Promise.all to  get an array of promises and execute all promises using Promise.all. Using Promise.all with Array.map() is recommended if we want to concurrently execute asynchronous code for each element in an array. Hence, improving the performance of the code.
 
 // By using Promise.all along with map, you ensure that the timer is stopped only after all the asynchronous operations inside the mapping are fully completed, giving you an accurate measurement of the execution time.
+export type EnrollmentData = {
+  dancerId: Dancer["id"];
+  danceClassId: DanceClass["id"];
+  studioId: Studio["userId"];
+};
 
 export async function seedEnrollments(prisma: PrismaClient) {
   console.log("seeding enrollments...");
@@ -32,16 +43,22 @@ export async function seedEnrollments(prisma: PrismaClient) {
       const studio =
         filteredStudios[Math.floor(Math.random() * filteredStudios.length)];
       const studioClasses = studio.danceClasses;
-      let classesToEnroll = [];
+      let classesToEnroll: EnrollmentData[] = [];
       while (classesToEnroll.length < 5) {
         const randomIndex = Math.floor(Math.random() * studioClasses.length);
         const danceClass = studioClasses[randomIndex];
-        classesToEnroll.push({
-          dancerId: dancer.id,
-          danceClassId: danceClass.id,
-          studioId: studio.userId,
-        });
-        studioClasses.splice(randomIndex, 1);
+        //avoid enrolling a dancer in the same class twice
+        if (
+          !classesToEnroll.some(
+            (enrollment) => enrollment.danceClassId === danceClass.id,
+          )
+        ) {
+          classesToEnroll.push({
+            dancerId: dancer.id,
+            danceClassId: danceClass.id,
+            studioId: studio.userId,
+          });
+        }
       }
 
       await prisma.enrollment.createMany({
@@ -50,7 +67,7 @@ export async function seedEnrollments(prisma: PrismaClient) {
     }),
   );
 
-  console.log("enrollments seeded. totalEnrollments:", totalEnrollments);
+  console.log("enrollments seeded");
 }
 
 async function main() {

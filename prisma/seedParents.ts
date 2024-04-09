@@ -155,6 +155,43 @@ async function seedParentsAndDancers(prisma: PrismaClient) {
       },
     });
   }
+  // create sample parent for login
+  const hashedExamplePassword = await bcrypt.hash(`parentjdoe`, 10);
+  await prisma.user.upsert({
+    where: {
+      email: `janedoe@example.com`,
+    },
+    update: {},
+    create: {
+      email: `jdoe@example.com`,
+      password: hashedExamplePassword,
+      type: "PARENT",
+      parent: {
+        create: {
+          firstName: "Jane",
+          lastName: "Doe",
+          dancers: {
+            createMany: {
+              data: [
+                {
+                  firstName: `${
+                    dancerNames[Math.floor(Math.random() * dancerNames.length)]
+                  }`,
+                  lastName: "Doe",
+                },
+                {
+                  firstName: `${
+                    dancerNames[Math.floor(Math.random() * dancerNames.length)]
+                  }`,
+                  lastName: "Doe",
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
 async function main() {

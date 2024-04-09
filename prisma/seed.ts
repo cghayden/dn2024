@@ -6,10 +6,10 @@ import { seedEnrollments } from "./seedEnrollments";
 const prisma = new PrismaClient();
 
 async function seed() {
-  // await seedStudios(prisma);
+  await seedStudios(prisma);
   await seedDanceClasses(prisma);
-  // await seedParentsAndDancers(prisma);
-  // await seedEnrollments(prisma);
+  await seedParentsAndDancers(prisma);
+  await seedEnrollments(prisma);
 }
 
 seed()
