@@ -6,12 +6,14 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "@remix-run/react";
 
 import buttons from "./css/buttons.css";
 import cssGlobals from "./css/global.css";
 import styles from "./tailwind.css";
 import "@fontsource/inter/400.css";
+import { formatErrorMessage } from "./lib/formatError";
 
 // import { NavigationProvider } from './components/context/NavContext'
 
@@ -41,13 +43,35 @@ export default function App() {
         <Links />
       </head>
       {/* <NavigationProvider> */}
-      <body className="bg-gray-150 text-base font-Inter min-h-screen">
+      <body className="min-h-screen bg-gray-150 font-Inter text-base">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
       </body>
       {/* </NavigationProvider> */}
+    </html>
+  );
+}
+
+// this ErrorBoundary at the root level must render the <html> tag, in this case, <Document>
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const formattedError = formatErrorMessage(error);
+
+  return (
+    <html>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <title>Uh - Oh!</title>
+        <Links />
+      </head>
+      {/* <Header /> */}
+      <div className="mx-auto my-6 w-11/12 min-w-[316px] max-w-[800px] rounded bg-red-200 p-4 text-center text-slate-800 shadow-lg">
+        {formattedError}
+      </div>
     </html>
   );
 }
