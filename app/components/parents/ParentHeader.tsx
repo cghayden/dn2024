@@ -12,7 +12,7 @@ export type NavLink = {
   url: string;
 };
 
-export default function StudioHeader({
+export default function ParentHeader({
   showNav,
   toggleShowNav,
 }: {

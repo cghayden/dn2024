@@ -1,7 +1,6 @@
 import { redirect, type LoaderFunctionArgs, json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import DanceClassListing from "~/components/parents/DanceClassListing";
-import { ContentContainer } from "~/components/styledComponents/ContentContainer";
 import { PageHeader } from "~/components/styledComponents/PageHeader";
 import { prisma } from "~/db.server";
 import { requireParentUserId } from "~/models/parent.server";
@@ -94,8 +93,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function ParentIndex() {
   const { parent, danceClasses, enrollments } = useLoaderData<typeof loader>();
-  console.log("enrollments", enrollments);
-  // console.log("parent danceClasses", danceClasses);
   if (!parent.dancers.length) {
     return (
       <div>

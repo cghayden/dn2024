@@ -3,7 +3,7 @@ import { verifyLogin } from "~/models/user.server";
 import { createUserSession } from "~/session.server";
 
 export const loader = async ({ request }: ActionFunctionArgs) => {
-  const user = await verifyLogin("studioa@example.com", "studioaa");
+  const user = await verifyLogin("jdoe@example.com", "parentjdoe");
 
   if (!user) {
     return redirect("./welcome");

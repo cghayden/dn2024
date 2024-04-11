@@ -151,3 +151,7 @@ body {
 .filterCategoryWrapper ul li input[type="checkbox"] {
   margin-right: 0.5rem;
 }
+
+.contentContainer {
+  border-radius: 0.375rem;
+}

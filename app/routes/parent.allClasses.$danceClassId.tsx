@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { useEffect } from "react";
 import { ContentContainer } from "~/components/styledComponents/ContentContainer";
 import { getDanceClass, requireParentUserId } from "~/models/parent.server";
 
@@ -13,12 +14,31 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export default function SelectedDanceClass() {
-  const danceClass = useLoaderData<typeof loader>();
-  console.log("danceClass", danceClass);
+  const {
+    name,
+    performanceName,
+    footwear,
+    footwearId,
+    tights,
+    tightsId,
+    dayOfWeek,
+    startTime,
+    endTime,
+    song,
+    studio,
+    studioNotes,
+  } = useLoaderData<typeof loader>();
+
   return (
-    <ContentContainer>
-      <h1>Selected Dance Class</h1>
-      <p>{danceClass.name}</p>
-    </ContentContainer>
+    <div className="px-4">
+      <ContentContainer className="p-4">
+        <h2 className="pb-4 text-center text-lg font-bold">{name}</h2>
+        <div className="">
+          {performanceName && <p>"{performanceName}"</p>}
+          <p>Footwear: {footwear?.name}</p>
+          <p>Tights: {tights?.name}</p>
+        </div>
+      </ContentContainer>
+    </div>
   );
 }

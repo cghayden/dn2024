@@ -41,14 +41,14 @@ export default function ParentNav({
   return (
     <div
       ref={navRef}
-      className={`nav_frame_custom bg-gray-200 text-gray-900 fixed  left-0  z-20 transition-all flex items-stretch
+      className={`nav_frame_custom fixed left-0 z-20  flex  h-full items-stretch bg-gray-200 text-gray-900 transition-all
     ${showNav ? "translate-x-0 " : "-translate-x-full"}
     `}
     >
-      <nav className="nav_custom items-stretch flex flex-col flex-auto h-full min-h-full min-w-[15rem]">
-        <div className="h-[3.5rem] bg-slate-900 flex items-center p-4 text-slate-50 ">
+      <nav className="nav_custom flex h-full min-h-full min-w-[15rem] flex-auto flex-col items-stretch">
+        <div className="flex h-[3.5rem] items-center bg-slate-900 p-4 text-slate-50 ">
           <button
-            className=" grid place-items-center md:hidden text-slate-50"
+            className=" grid place-items-center text-slate-50 md:hidden"
             type="button"
             aria-label="show navigation menu"
             onClick={(e) => {
@@ -57,11 +57,8 @@ export default function ParentNav({
           >
             <MenuSvg />
           </button>
-          <Link to={`/parent}`} className="hidden md:block">
-            {parentNavData?.firstName} {parentNavData?.lastName}
-          </Link>
         </div>
-        <Link to={"/parent"} className=" pl-4 py-2 font-bold inline-block">
+        <Link to={"/parent"} className=" inline-block py-2 pl-4 font-bold">
           Home
         </Link>
         <div className="my-2">
@@ -71,7 +68,7 @@ export default function ParentNav({
             {dancerLinks.map((link) => (
               <li key={link.label} className="px-3">
                 <Link
-                  className="flex items-center my-2 pl-4 pr-2"
+                  className="my-2 flex items-center pl-4 pr-2"
                   to={`${link.url}`}
                   onClick={() => {
                     toggleShowNav(false);
@@ -90,7 +87,7 @@ export default function ParentNav({
             {studioLinks.map((link) => (
               <li key={link.label} className="px-3">
                 <Link
-                  className="flex items-center my-2 pl-4 pr-2"
+                  className="my-2 flex items-center pl-4 pr-2"
                   to={`${link.url}`}
                   onClick={() => {
                     toggleShowNav(false);
@@ -109,7 +106,7 @@ export default function ParentNav({
             {contentLinks.map((link) => (
               <li key={link.label} className="px-3">
                 <Link
-                  className="flex items-center my-2 pl-4 pr-2"
+                  className="my-2 flex items-center pl-4 pr-2"
                   to={`${link.url}`}
                   onClick={() => {
                     toggleShowNav(false);
@@ -122,13 +119,13 @@ export default function ParentNav({
           </ul>
         </div>
 
-        <div className="pb-6 my-2">
-          <legend className=" pl-4 font-bold text-l">Settings</legend>
+        <div className="my-2 pb-6">
+          <legend className=" text-l pl-4 font-bold">Settings</legend>
           <ul>
             {settingsLinks.map((link) => (
               <li key={link.label} className="px-3">
                 <Link
-                  className="flex items-center my-2 pl-4 pr-2"
+                  className="my-2 flex items-center pl-4 pr-2"
                   to={`${link.url}`}
                   onClick={() => {
                     toggleShowNav(false);
@@ -141,7 +138,7 @@ export default function ParentNav({
             ))}
             <li className="px-3">
               <Form
-                className="flex items-center my-2 pl-4 pr-2"
+                className="my-2 flex items-center pl-4 pr-2"
                 action="/logout"
                 method="post"
               >

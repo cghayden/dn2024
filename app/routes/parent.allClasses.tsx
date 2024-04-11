@@ -1,19 +1,19 @@
 import { redirect, type LoaderFunctionArgs, json } from "@remix-run/node";
-import { Link, Outlet, useLoaderData } from "@remix-run/react";
+import { Outlet, useLoaderData, useParams } from "@remix-run/react";
 import DanceClassListing from "~/components/parents/DanceClassListing";
-import { ContentContainer } from "~/components/styledComponents/ContentContainer";
+
 import { PageHeader } from "~/components/styledComponents/PageHeader";
 import { prisma } from "~/db.server";
 import { requireParentUserId } from "~/models/parent.server";
-import { DanceClass, Parent, Studio } from "@prisma/client";
+import { DanceClass, Studio } from "@prisma/client";
 
 export type ParentDanceClassListing = DanceClass & {
   dancerNames: string[];
   studio: Pick<Studio, "name" | "userId"> | null;
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // check for userId(logged in user) and 'PARENT' type, return id if so
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+  const selectedDanceClassId = params.danceClassId; // check for userId(logged in user) and 'PARENT' type, return id if so
   const userId = await requireParentUserId(request);
   const dancers = await prisma.dancer.findMany({
     where: {
@@ -94,8 +94,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function ParentIndex() {
   const { parent, danceClasses, enrollments } = useLoaderData<typeof loader>();
-  console.log("enrollments", enrollments);
-  // console.log("parent danceClasses", danceClasses);
+  const params = useParams();
+
   if (!parent.dancers.length) {
     return (
       <div>
@@ -110,7 +110,11 @@ export default function ParentIndex() {
       <div className="grid" style={{ gridTemplateColumns: "310px 1fr" }}>
         <div>
           {danceClasses.map((danceClass) => (
-            <DanceClassListing key={danceClass?.id} danceClass={danceClass} />
+            <DanceClassListing
+              key={danceClass?.id}
+              danceClass={danceClass}
+              active={params.danceClassId === danceClass.id}
+            />
           ))}
         </div>
         <Outlet />

@@ -76,7 +76,6 @@ model DanceClass {
   footwearId                String?
   tights                    Tights?      @relation(fields: [tightsId], references: [id])
   tightsId                  String?
-  notes                     String?
   song                      String?
   competitions              Boolean?
   recital                   Boolean
@@ -100,7 +99,7 @@ model DanceClass {
   competitionEntryTime      String?
   competitionEntryDayOfWeek String?
   studioNotes               String?
-  compSchedule              String?
+  compScheduleUrl           String?
 }
 
 model ParentNote {

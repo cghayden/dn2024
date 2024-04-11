@@ -6,7 +6,7 @@ import {
   getParentUser,
   requireParentUserId,
 } from "~/models/parent.server";
-import StudioHeader from "~/components/studios/StudioHeader";
+import ParentHeader from "~/components/parents/ParentHeader";
 import ParentNav from "~/components/parents/ParentNav";
 import type { NavLink } from "types";
 import { useState } from "react";
@@ -70,7 +70,7 @@ function ParentLayout() {
   ];
   return (
     <>
-      <StudioHeader showNav={showNav} toggleShowNav={toggleShowNav} />
+      <ParentHeader showNav={showNav} toggleShowNav={toggleShowNav} />
       <ParentNav
         links={parentLinks}
         showNav={showNav}
@@ -78,7 +78,7 @@ function ParentLayout() {
         parentNavData={parentNavData}
       />
       <main className="main_custom">
-        <div className="px-6 flex-1">
+        <div className="flex-1 px-6">
           <Outlet />
         </div>
       </main>
