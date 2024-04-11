@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-
 // const prisma = new PrismaClient();
+
+// remove all whitespace and make lowercase
+function normalizeString(str: string) {
+  return str.replace(/\s/g, "").toLowerCase();
+}
 
 async function seedStudios(prisma: PrismaClient) {
   const skill_levels = ["Recreational", "Company"];
@@ -122,28 +126,31 @@ async function seedStudios(prisma: PrismaClient) {
     // },
   ];
   console.log("seeding studios");
-  const studioNames = ["A", "B", "C", "D", "E"];
+  const studioNames = [
+    "Spotlight Studio",
+    "Tela's Dance Academy",
+    "Expressions Dance",
+    "Dance Dynamics",
+    "Dance Connection",
+  ];
   const stylesOfDance = ["Tap", "Hip Hop", "Jazz", "Lyrical"];
 
   for (const name of studioNames) {
     // Create Studio-type User
-    const hashedPassword = await bcrypt.hash(
-      `studio${name.toLowerCase()}${name.toLowerCase()}`,
-      10,
-    );
+    const hashedPassword = await bcrypt.hash(normalizeString(name), 10);
     await prisma.user
       .upsert({
         where: {
-          email: `studio${name.toLowerCase()}@example.com`,
+          email: `${normalizeString(name)}@example.com`,
         },
         update: {},
         create: {
-          email: `studio${name.toLowerCase()}@example.com`,
+          email: `${normalizeString(name)}@example.com`,
           password: hashedPassword,
           type: "STUDIO",
           studio: {
             create: {
-              name: `Studio ${name}`,
+              name,
             },
           },
         },

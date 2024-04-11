@@ -1,5 +1,4 @@
 import MenuSvg from "../icons/MenuSvg";
-// import { useNavContext } from '../context/NavContext'
 // TODO - make this a reusable component for parent/studio/etc.
 
 export type HeaderProps = {

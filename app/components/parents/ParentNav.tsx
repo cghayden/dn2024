@@ -57,11 +57,12 @@ export default function ParentNav({
           >
             <MenuSvg />
           </button>
+
+          <Link to={"/parent"} className="hidden md:block">
+            {parentNavData?.firstName} {parentNavData?.lastName}'s dancernotes
+          </Link>
         </div>
-        <Link to={"/parent"} className=" inline-block py-2 pl-4 font-bold">
-          Home
-        </Link>
-        <div className="my-2">
+        <div className="pt-4">
           <legend className=" pl-4 font-bold">Dancers</legend>
 
           <ul>
