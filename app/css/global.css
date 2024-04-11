@@ -155,3 +155,40 @@ body {
 .contentContainer {
   border-radius: 0.375rem;
 }
+
+.modalOnSmallScreen {
+  /* Default styles for large screens */
+  position: relative;
+  display: block;
+}
+
+.closeModal {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .modalOnSmallScreen {
+    /* Modal styles for small screens */
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .modalContainer {
+    min-height: 80%;
+  }
+
+  .closeModal {
+    display: block;
+    /* position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1.5rem;
+    cursor: pointer; */
+  }
+}
