@@ -1,11 +1,22 @@
 import {
   ActionFunctionArgs,
+  LinksFunction,
+  LoaderFunctionArgs,
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { getOrCreateVectorStore } from "~/lib/openai/getOrCreateVectorStore";
 import { openai } from "~/lib/openai/openaiConfig";
+import chatstyles from "~/css/chat.css";
+import styles from "~/css/file-viewer.css";
+import TrashIcon from "~/components/icons/TrashIcon";
+import Chat from "~/components/Chat";
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles },
+  { rel: "stylesheet", href: chatstyles },
+];
 
 export type UploadedFileObject = {
   id: string;
@@ -37,9 +48,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   console.log("openaiFile", openaiFile);
   const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
   // add file to vector store
-  await openai.beta.vectorStores.files.create(vectorStoreId, {
-    file_id: openaiFile.id,
-  });
+  const vectorstoreResponse = await openai.beta.vectorStores.files.create(
+    vectorStoreId,
+    {
+      file_id: openaiFile.id,
+    },
+  );
+  console.log("vectorstoreResponse", vectorstoreResponse);
 
   return { message: "action function run successfully" };
 };
@@ -48,6 +63,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
   const fileList = await openai.beta.vectorStores.files.list(vectorStoreId);
 
+  //get files that belong to this studio
   const filesArray = await Promise.all(
     fileList.data.map(async (file) => {
       const fileDetails = await openai.files.retrieve(file.id);
@@ -62,20 +78,65 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       };
     }),
   );
-  return filesArray;
+  return { files: filesArray };
 };
 
 export default function StudioAssistant() {
-  const data = useLoaderData<typeof loader>();
-  console.log("data", data);
+  const fetcher = useFetcher();
+
+  const { files } = useLoaderData<typeof loader>();
+  console.log("files", files);
   return (
-    <div>
-      <h1>Upload A File To Open Ai</h1>
-      <Form method="post" encType="multipart/form-data">
-        <label htmlFor="avatar-input">Avatar</label>
-        <input id="file-input" type="file" name="file" />
-        <button>Upload</button>
-      </Form>
+    <div className="page-container">
+      <div className="column">
+        <div className="fileViewer">
+          <div
+            className={`filesList
+            ${files.length !== 0 ? "grow" : ""}`}
+          >
+            {files.length === 0 ? (
+              <div className="title">Attach files to test file search</div>
+            ) : (
+              files.map((file) => (
+                <div key={file.file_id} className="fileEntry">
+                  <div className="fileName">
+                    <span className="fileName">{file.filename}</span>
+                    <span className="fileStatus">{file.status}</span>
+                  </div>
+                  {/* <span onClick={() => handleFileDelete(file.file_id)}> */}
+                  <span onClick={() => console.log("delete file")}>
+                    <TrashIcon />
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="fileUploadContainer">
+            <fetcher.Form encType="multipart/form-data">
+              <label htmlFor="file-upload" className="fileUploadBtn">
+                Attach files
+              </label>
+              <input
+                type="file"
+                id="file-upload"
+                name="file-upload"
+                className="fileUploadInput"
+                multiple
+                onChange={(event) => {
+                  fetcher.submit(event.currentTarget.form, {
+                    method: "POST",
+                  });
+                }}
+              />
+            </fetcher.Form>
+          </div>
+        </div>
+      </div>
+      <div className="page_chatContainer">
+        <div className="chat">
+          <Chat />
+        </div>
+      </div>
     </div>
   );
 }
