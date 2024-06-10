@@ -19,29 +19,29 @@ export type UploadedFileObject = {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  // const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
-  const uploadHandler = unstable_composeUploadHandlers(
-    unstable_createFileUploadHandler({
-      maxPartSize: 5_000_000,
-      file: ({ filename }) => filename,
-    }),
-    // parse everything else into memory
-    unstable_createMemoryUploadHandler(),
-  );
-
+  const uploadHandler = unstable_createMemoryUploadHandler({
+    maxPartSize: 500_000,
+  });
   const formData = await unstable_parseMultipartFormData(
     request,
     uploadHandler,
   );
 
   const file = formData.get("file");
-  console.log("file", file);
+  if (!file) {
+    throw new Error("No file was uploaded");
+  }
 
   const openaiFile = await openai.files.create({
     file: file,
     purpose: "assistants",
   });
   console.log("openaiFile", openaiFile);
+  const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
+  // add file to vector store
+  await openai.beta.vectorStores.files.create(vectorStoreId, {
+    file_id: openaiFile.id,
+  });
 
   return { message: "action function run successfully" };
 };
