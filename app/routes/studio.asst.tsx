@@ -1,11 +1,9 @@
 import {
   ActionFunctionArgs,
-  unstable_composeUploadHandlers,
-  unstable_createFileUploadHandler,
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
-import { Form } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { getOrCreateVectorStore } from "~/lib/openai/getOrCreateVectorStore";
 import { openai } from "~/lib/openai/openaiConfig";
 
@@ -46,7 +44,30 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   return { message: "action function run successfully" };
 };
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
+  const fileList = await openai.beta.vectorStores.files.list(vectorStoreId);
+
+  const filesArray = await Promise.all(
+    fileList.data.map(async (file) => {
+      const fileDetails = await openai.files.retrieve(file.id);
+      const vectorFileDetails = await openai.beta.vectorStores.files.retrieve(
+        vectorStoreId,
+        file.id,
+      );
+      return {
+        file_id: file.id,
+        filename: fileDetails.filename,
+        status: vectorFileDetails.status,
+      };
+    }),
+  );
+  return filesArray;
+};
+
 export default function StudioAssistant() {
+  const data = useLoaderData<typeof loader>();
+  console.log("data", data);
   return (
     <div>
       <h1>Upload A File To Open Ai</h1>
