@@ -6,7 +6,7 @@ const getOrCreateVectorStore = async ({
   userName,
 }: {
   assistant: Assistant;
-  userName: string;
+  userName?: string;
 }) => {
   // const assistantId = process.env.OPENAI_ASSISTANT_ID!;
   // const assistant = await openai.beta.assistants.retrieve(assistantId);

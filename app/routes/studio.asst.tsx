@@ -125,14 +125,27 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }),
   );
   const thread = await openai.beta.threads.create();
-  return { files: filesArray, threadId: thread.id, assistant };
+  return {
+    files: filesArray,
+    threadId: thread.id,
+    assistant,
+    assistantId: assistant.id,
+  };
 };
 
 export default function StudioAssistant() {
   const fetcher = useFetcher();
   const submit = useSubmit();
 
-  const { files, threadId, assistant } = useLoaderData<typeof loader>();
+  const { files, threadId, assistant, assistantId } =
+    useLoaderData<typeof loader>();
+
+  const handleFileDelete = async (fileId) => {
+    await fetch("/api/files", {
+      method: "DELETE",
+      body: JSON.stringify({ fileId, assistant }),
+    });
+  };
   // console.log("assistant in client", assistant);
   return (
     <div className="page-container">
@@ -151,8 +164,7 @@ export default function StudioAssistant() {
                     <span className="fileName">{file.filename}</span>
                     <span className="fileStatus">{file.status}</span>
                   </div>
-                  {/* <span onClick={() => handleFileDelete(file.file_id)}> */}
-                  <span onClick={() => console.log("delete file")}>
+                  <span onClick={() => handleFileDelete(file.file_id)}>
                     <TrashIcon />
                   </span>
                 </div>
