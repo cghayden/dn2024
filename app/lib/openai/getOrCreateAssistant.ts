@@ -10,7 +10,6 @@ export async function getOrCreateAssistant({
 }) {
   if (assistantId) {
     try {
-      console.log("retrieving your assistant");
       const assistant = await openai.beta.assistants.retrieve(assistantId);
       return assistant;
     } catch (error) {
@@ -18,7 +17,7 @@ export async function getOrCreateAssistant({
     }
   } else {
     try {
-      console.log("creating a new assistant");
+      // console.log("creating a new assistant");
 
       const assistant = await openai.beta.assistants.create({
         instructions:

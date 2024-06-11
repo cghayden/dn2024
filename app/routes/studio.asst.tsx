@@ -5,7 +5,7 @@ import {
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import { getOrCreateVectorStore } from "~/lib/openai/getOrCreateVectorStore";
 import { openai } from "~/lib/openai/openaiConfig";
 import chatstyles from "~/css/chat.css";
@@ -33,6 +33,7 @@ export type UploadedFileObject = {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  console.log("request", request.formData);
   // const userId = await requireStudioUserId(request);
   // const user = await prisma.studio.findUnique({
   //   where: {
@@ -98,7 +99,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     userId,
     assistantId: user?.assistantId,
   });
-  console.log("assistant", assistant);
+  // console.log("assistant", assistant);
 
   // get or create vector store}
   const vectorStoreId = await getOrCreateVectorStore({
@@ -129,9 +130,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function StudioAssistant() {
   const fetcher = useFetcher();
+  const submit = useSubmit();
 
   const { files, threadId, assistant } = useLoaderData<typeof loader>();
-  console.log("assistant in client", assistant);
+  // console.log("assistant in client", assistant);
   return (
     <div className="page-container">
       <div className="column">
@@ -158,29 +160,36 @@ export default function StudioAssistant() {
             )}
           </div>
           <div className="fileUploadContainer">
-            <fetcher.Form encType="multipart/form-data">
+            <fetcher.Form
+              method="post"
+              encType="multipart/form-data"
+              // onSubmit={(e) => {
+              //   e.preventDefault();
+              //   console.log("e", e);
+              //   // const body = new FormData();
+              //   // body.append("file", e.target.)
+              // }}
+            >
               <label htmlFor="file-upload" className="fileUploadBtn">
                 Attach files
               </label>
               <input
-                type="file"
                 id="file-upload"
-                name="file-upload"
+                type="file"
+                name="file"
                 className="fileUploadInput"
-                multiple
                 onChange={(event) => {
-                  fetcher.submit(event.currentTarget.form, {
+                  console.log("event", event);
+                  const body = new FormData();
+                  if (!event.target.files) return;
+                  body.append("file", event.target.files[0]);
+                  fetcher.submit(body, {
                     method: "POST",
+                    encType: "multipart/form-data",
                   });
                 }}
               />
-              {/* <input
-                type="hidden"
-                name="vectorStoreId"
-                value={
-                  assistant.tool_resources?.file_search?.vector_store_ids?.[0]
-                }
-              /> */}
+              {/* <button>Upload</button> */}
             </fetcher.Form>
           </div>
         </div>
