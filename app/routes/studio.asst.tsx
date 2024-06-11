@@ -12,6 +12,11 @@ import chatstyles from "~/css/chat.css";
 import styles from "~/css/file-viewer.css";
 import TrashIcon from "~/components/icons/TrashIcon";
 import Chat from "~/components/Chat";
+import { requireStudioUserId } from "~/models/studio.server";
+import { get } from "http";
+import { getOrCreateAssistant } from "~/lib/openai/getOrCreateAssistant";
+import { prisma } from "~/db.server";
+import { Assistant } from "openai/resources/beta/assistants";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -28,6 +33,16 @@ export type UploadedFileObject = {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  // const userId = await requireStudioUserId(request);
+  // const user = await prisma.studio.findUnique({
+  //   where: {
+  //     userId,
+  //   },
+  //   select: {
+  //     assistantId: true,
+  //     name: true,
+  //   },
+  // });
   const uploadHandler = unstable_createMemoryUploadHandler({
     maxPartSize: 500_000,
   });
@@ -37,6 +52,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   );
 
   const file = formData.get("file");
+  // const vectorStoreId = formData.get("vectorStoreId") as string;
+  // console.log("vectorStoreId in action", vectorStoreId);
+
   if (!file) {
     throw new Error("No file was uploaded");
   }
@@ -45,10 +63,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     file: file,
     purpose: "assistants",
   });
-  const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
+
+  // const vectorStoreId = await getOrCreateVectorStore({
+  //   assistant,
+  //   userName: user?.name,
+  // });
   // add file to vector store
   const vectorstoreResponse = await openai.beta.vectorStores.files.create(
-    vectorStoreId,
+    "vs_nJUITSeoHWX8iUvq5crPedLV",
     {
       file_id: openaiFile.id,
     },
@@ -59,7 +81,31 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
+  const userId = await requireStudioUserId(request);
+  const user = await prisma.studio.findUnique({
+    where: {
+      userId,
+    },
+    select: {
+      assistantId: true,
+      name: true,
+    },
+  });
+
+  if (!user) throw new Error("User not found");
+
+  const assistant = await getOrCreateAssistant({
+    userId,
+    assistantId: user?.assistantId,
+  });
+  console.log("assistant", assistant);
+
+  // get or create vector store}
+  const vectorStoreId = await getOrCreateVectorStore({
+    assistant: assistant,
+    userName: user?.name,
+  });
+
   const fileList = await openai.beta.vectorStores.files.list(vectorStoreId);
 
   //get files that belong to this studio
@@ -78,13 +124,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }),
   );
   const thread = await openai.beta.threads.create();
-  return { files: filesArray, threadId: thread.id };
+  return { files: filesArray, threadId: thread.id, assistant };
 };
 
 export default function StudioAssistant() {
-  const fetcher = useFetcher({ key: "fileLoader" });
+  const fetcher = useFetcher();
 
-  const { files, threadId } = useLoaderData<typeof loader>();
+  const { files, threadId, assistant } = useLoaderData<typeof loader>();
+  console.log("assistant in client", assistant);
   return (
     <div className="page-container">
       <div className="column">
@@ -127,14 +174,19 @@ export default function StudioAssistant() {
                   });
                 }}
               />
+              {/* <input
+                type="hidden"
+                name="vectorStoreId"
+                value={
+                  assistant.tool_resources?.file_search?.vector_store_ids?.[0]
+                }
+              /> */}
             </fetcher.Form>
           </div>
         </div>
       </div>
       <div className="page_chatContainer">
-        <div className="chat">
-          <Chat />
-        </div>
+        <div className="chat">{/* <Chat /> */}</div>
       </div>
     </div>
   );
