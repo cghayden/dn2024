@@ -45,7 +45,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     file: file,
     purpose: "assistants",
   });
-  console.log("openaiFile", openaiFile);
   const vectorStoreId = await getOrCreateVectorStore(); // get or create vector store
   // add file to vector store
   const vectorstoreResponse = await openai.beta.vectorStores.files.create(
@@ -78,14 +77,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       };
     }),
   );
-  return { files: filesArray };
+  const thread = await openai.beta.threads.create();
+  return { files: filesArray, threadId: thread.id };
 };
 
 export default function StudioAssistant() {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher({ key: "fileLoader" });
 
-  const { files } = useLoaderData<typeof loader>();
-  console.log("files", files);
+  const { files, threadId } = useLoaderData<typeof loader>();
   return (
     <div className="page-container">
       <div className="column">

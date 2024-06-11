@@ -1,10 +1,16 @@
-import { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  LinksFunction,
+  LoaderFunctionArgs,
+} from "@remix-run/node";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { RequiredActionFunctionToolCall } from "openai/resources/beta/threads/runs/runs";
 import { useEffect, useRef, useState } from "react";
-// import Markdown from "react-markdown";
 import { openai } from "~/lib/openai/openaiConfig";
-
-type MessageProps = {
+import { AssistantStream } from "openai/lib/AssistantStream";
+// @ts-expect-error - no types for this yet
+import { AssistantStreamEvent } from "openai/resources/beta/assistants/assistants";
+type Message = {
   role: "user" | "assistant" | "code";
   text: string;
 };
@@ -33,7 +39,7 @@ const CodeMessage = ({ text }: { text: string }) => {
   );
 };
 
-const Message = ({ role, text }: MessageProps) => {
+const Message = ({ role, text }: Message) => {
   switch (role) {
     case "user":
       return <UserMessage text={text} />;
@@ -52,19 +58,21 @@ type ChatProps = {
   ) => Promise<string>;
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const thread = await openai.beta.threads.create();
-  console.log("thread", thread);
-  return { threadId: thread.id };
+export type LoaderData = {
+  threadId: string;
 };
 
 const Chat = ({
   functionCallHandler = () => Promise.resolve(""), // default to return empty string
 }: ChatProps) => {
+  const fetcher = useFetcher({ key: "sendMessage" });
+  const { threadId } = useLoaderData<LoaderData>();
+  console.log("fetcher", fetcher);
+
   const [userInput, setUserInput] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  console.log("messages", messages);
   const [inputDisabled, setInputDisabled] = useState(false);
-  const [threadId, setThreadId] = useState("");
 
   // automatically scroll to bottom of chat
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -75,17 +83,38 @@ const Chat = ({
     scrollToBottom();
   }, [messages]);
 
-  // create a new threadID when chat component created
-  // useEffect(() => {
-  //   const createThread = async () => {
-  //     const res = await fetch(`/api/assistants/threads`, {
-  //       method: "POST",
-  //     });
-  //     const data = await res.json();
-  //     setThreadId(data.threadId);
-  //   };
-  //   createThread();
-  // }, []);
+  useEffect(() => {
+    if (fetcher.data?.role === "assistant") {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: fetcher.data.message },
+      ]);
+      setInputDisabled(false);
+    }
+  }, [fetcher.data]);
+
+  function submitFetcher() {
+    const body = new FormData();
+    body.append("threadId", threadId);
+    body.append("text", userInput);
+    fetcher.submit(body, {
+      method: "POST",
+      action: "/studio/resource/sendMessage",
+    });
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+    submitFetcher();
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { role: "user", text: userInput },
+    ]);
+    setUserInput("");
+    setInputDisabled(true);
+    scrollToBottom();
+  };
 
   return (
     <div className="chat_chatContainer">
@@ -95,11 +124,14 @@ const Chat = ({
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form
-        // onSubmit={handleSubmit}
+      <fetcher.Form
+        id="userInput"
         className="chat_inputForm chat_clearfix"
+        onSubmit={handleSubmit}
       >
+        <input type="hidden" name="threadId" value={threadId} />
         <input
+          name="text"
           type="text"
           className="chat_input"
           value={userInput}
@@ -109,11 +141,12 @@ const Chat = ({
         <button
           type="submit"
           className="chat_button"
+          form="userInput"
           // disabled={inputDisabled}
         >
           Send
         </button>
-      </form>
+      </fetcher.Form>
     </div>
   );
 };
