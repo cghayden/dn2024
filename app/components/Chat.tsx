@@ -67,11 +67,9 @@ const Chat = ({
 }: ChatProps) => {
   const fetcher = useFetcher({ key: "sendMessage" });
   const { threadId } = useLoaderData<LoaderData>();
-  console.log("fetcher", fetcher);
 
   const [userInput, setUserInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  console.log("messages", messages);
   const [inputDisabled, setInputDisabled] = useState(false);
 
   // automatically scroll to bottom of chat

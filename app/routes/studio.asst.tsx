@@ -5,7 +5,7 @@ import {
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { getOrCreateVectorStore } from "~/lib/openai/getOrCreateVectorStore";
 import { openai } from "~/lib/openai/openaiConfig";
 import chatstyles from "~/css/chat.css";
@@ -13,7 +13,6 @@ import styles from "~/css/file-viewer.css";
 import TrashIcon from "~/components/icons/TrashIcon";
 import Chat from "~/components/Chat";
 import { requireStudioUserId } from "~/models/studio.server";
-import { get } from "http";
 import { getOrCreateAssistant } from "~/lib/openai/getOrCreateAssistant";
 import { prisma } from "~/db.server";
 import { Assistant } from "openai/resources/beta/assistants";
@@ -33,7 +32,6 @@ export type UploadedFileObject = {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  console.log("request", request.formData);
   // const userId = await requireStudioUserId(request);
   // const user = await prisma.studio.findUnique({
   //   where: {
@@ -89,19 +87,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     },
     select: {
       assistantId: true,
+      vectorStoreId: true,
       name: true,
     },
   });
 
   if (!user) throw new Error("User not found");
-
+  // TODO if user.assistantId is null, create assistant
   const assistant = await getOrCreateAssistant({
     userId,
     assistantId: user?.assistantId,
   });
-  // console.log("assistant", assistant);
 
-  // get or create vector store}
+  // TODO if user.vectorStoreId = null,create vector store
   const vectorStoreId = await getOrCreateVectorStore({
     assistant: assistant,
     userName: user?.name,
@@ -135,18 +133,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function StudioAssistant() {
   const fetcher = useFetcher();
-  const submit = useSubmit();
 
   const { files, threadId, assistant, assistantId } =
     useLoaderData<typeof loader>();
 
-  const handleFileDelete = async (fileId) => {
-    await fetch("/api/files", {
+  const handleFileDelete = async (fileId: string) => {
+    const body = new FormData();
+    body.append("fileId", fileId);
+    fetcher.submit(body, {
       method: "DELETE",
-      body: JSON.stringify({ fileId, assistant }),
+      action: "/api/files",
     });
   };
-  // console.log("assistant in client", assistant);
   return (
     <div className="page-container">
       <div className="column">
@@ -172,16 +170,7 @@ export default function StudioAssistant() {
             )}
           </div>
           <div className="fileUploadContainer">
-            <fetcher.Form
-              method="post"
-              encType="multipart/form-data"
-              // onSubmit={(e) => {
-              //   e.preventDefault();
-              //   console.log("e", e);
-              //   // const body = new FormData();
-              //   // body.append("file", e.target.)
-              // }}
-            >
+            <fetcher.Form method="post" encType="multipart/form-data">
               <label htmlFor="file-upload" className="fileUploadBtn">
                 Attach files
               </label>
@@ -191,7 +180,6 @@ export default function StudioAssistant() {
                 name="file"
                 className="fileUploadInput"
                 onChange={(event) => {
-                  console.log("event", event);
                   const body = new FormData();
                   if (!event.target.files) return;
                   body.append("file", event.target.files[0]);
@@ -201,7 +189,6 @@ export default function StudioAssistant() {
                   });
                 }}
               />
-              {/* <button>Upload</button> */}
             </fetcher.Form>
           </div>
         </div>
