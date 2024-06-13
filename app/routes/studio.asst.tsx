@@ -49,7 +49,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           file_id: openaiFile.id,
         },
       );
-      console.log("vectorstoreResponse", vectorstoreResponse);
 
       return { message: "file uploaded to vector store" };
     }
@@ -110,13 +109,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   // each studio / user has a vector store unique to them. ...
   // get files that belong to this vector store, unique to studio/user
   const fileList = await openai.beta.vectorStores.files.list(vectorStoreId);
-  console.log("files in vector store", fileList.data);
 
   const filesArray = await Promise.all(
     fileList.data.map(async (file) => {
       const fileDetails = await openai.files.retrieve(file.id);
-      console.log("fileDetails", fileDetails);
-
       return {
         file_id: file.id,
         filename: fileDetails.filename,
