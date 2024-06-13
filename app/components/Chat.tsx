@@ -1,15 +1,7 @@
-import {
-  ActionFunctionArgs,
-  LinksFunction,
-  LoaderFunctionArgs,
-} from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { RequiredActionFunctionToolCall } from "openai/resources/beta/threads/runs/runs";
 import { useEffect, useRef, useState } from "react";
-import { openai } from "~/lib/openai/openaiConfig";
-import { AssistantStream } from "openai/lib/AssistantStream";
-// @ts-expect-error - no types for this yet
-import { AssistantStreamEvent } from "openai/resources/beta/assistants/assistants";
 type Message = {
   role: "user" | "assistant" | "code";
   text: string;
