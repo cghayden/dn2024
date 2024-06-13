@@ -60,6 +60,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
       let deResponse = await openai.files.del(fileId);
       if (deResponse.deleted === true) {
+        // delay response by 1 sec to allow time to propagate deletion through to VectorStore at OpenAi
         return new Promise((resolve) =>
           setTimeout(
             () =>
