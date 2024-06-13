@@ -64,6 +64,8 @@ model Studio {
   tights        Tights[]
   footwear      Footwear[]
   stylesOfDance StyleOfDance[]
+  vectorStoreId String?
+  assistantId   String?
 }
 
 model DanceClass {
