@@ -116,7 +116,6 @@ export default function StudioAssistant() {
   const [file, setFile] = useState<File | null>();
 
   const { presignedUrl, studioId } = useLoaderData<typeof loader>();
-  console.log("presignedUrl", presignedUrl);
 
   const handleFileDelete = (fileId: string) => {
     const body = new FormData();
@@ -126,30 +125,29 @@ export default function StudioAssistant() {
     });
   };
 
-  const handleS3Upload = async (e: React.SyntheticEvent) => {
+  const handleS3Upload = async (e) => {
     e.preventDefault();
     // setSubmitting(true)
-    // if(!file){
-    //   return null
-    // }
-    if (file) {
-      try {
-        await axios.put(presignedUrl, file, {
-          headers: {
-            "Content-Type": file.type,
-          },
-        });
-        // Handle successful upload response: save and redirect, -> resource route
-        const formData = new FormData();
-        formData.append("fileKey", studioId);
-        fetcher.submit(formData, {
-          method: "post",
-        });
-      } catch (error) {
-        console.error("Upload failed", error);
-        // setSubmitting(false)
-        // TODO Handle upload error
-      }
+    if (!e.target.files) return;
+    const file = e.target.files[0];
+    // 1. upload to s3
+    try {
+      const upRes = await axios.put(presignedUrl, file, {
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      const fileUrl = upRes.config.url;
+      //2a?. save file url to studio db
+      // 2b. split with langchain.
+      // 3. save to supabase vector store.
+      // 4. submit to openai for analysis and response.
+      // Handle successful upload response...
+    } catch (error) {
+      console.error("Upload failed", error);
+      // setSubmitting(false)
+      // TODO Handle upload error
     }
   };
   return (
@@ -169,14 +167,7 @@ export default function StudioAssistant() {
                 type="file"
                 name="file"
                 className="fileUploadInput"
-                onChange={async (event) => {
-                  if (!event.target.files) return;
-                  await axios.put(presignedUrl, event.target.files[0], {
-                    headers: {
-                      "Content-Type": event.target.files[0].type,
-                    },
-                  });
-                }}
+                onChange={(event) => handleS3Upload(event)}
               />
             </fetcher.Form>
           </div>
