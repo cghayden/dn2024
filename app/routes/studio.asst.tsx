@@ -14,6 +14,10 @@ import TrashIcon from "~/components/icons/TrashIcon";
 import Chat from "~/components/Chat";
 import { requireStudioUserId } from "~/models/studio.server";
 import { prisma } from "~/db.server";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { useState } from "react";
+import axios from "axios";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -85,53 +89,34 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await requireStudioUserId(request);
-  const user = await prisma.studio.findUnique({
-    where: {
-      userId,
+  const studioId = await requireStudioUserId(request);
+
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: process.env.STORAGE_ACCESS_KEY!,
+      secretAccessKey: process.env.STORAGE_SECRET!,
     },
-    select: {
-      vectorStoreId: true,
-      name: true,
-    },
+    region: process.env.STORAGE_REGION,
   });
 
-  if (!user) throw new Error("User not found");
-  let vectorStoreId = user.vectorStoreId;
-
-  if (!vectorStoreId) {
-    vectorStoreId = await createVectorStore({
-      userName: user.name,
-      userId,
-    });
-  }
-
-  // each studio / user has a vector store unique to them. ...
-  // get files that belong to this vector store, unique to studio/user
-  const fileList = await openai.beta.vectorStores.files.list(vectorStoreId);
-
-  const filesArray = await Promise.all(
-    fileList.data.map(async (file) => {
-      const fileDetails = await openai.files.retrieve(file.id);
-      return {
-        file_id: file.id,
-        filename: fileDetails.filename,
-      };
+  const fileKey = studioId;
+  const presignedUrl = await getSignedUrl(
+    client,
+    new PutObjectCommand({
+      Bucket: "dancernotes",
+      Key: `compSchedules/${fileKey}`,
     }),
   );
-  //todo - should create thread go in chat component when a new message is sent?
-  // const thread = await openai.beta.threads.create();
-  return {
-    files: filesArray,
-    // threadId: thread.id,
-    vectorStoreId,
-  };
+
+  return { presignedUrl, studioId };
 };
 
 export default function StudioAssistant() {
   const fetcher = useFetcher();
+  const [file, setFile] = useState<File | null>();
 
-  const { files, vectorStoreId } = useLoaderData<typeof loader>();
+  const { presignedUrl, studioId } = useLoaderData<typeof loader>();
+  console.log("presignedUrl", presignedUrl);
 
   const handleFileDelete = (fileId: string) => {
     const body = new FormData();
@@ -141,29 +126,38 @@ export default function StudioAssistant() {
     });
   };
 
+  const handleS3Upload = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    // setSubmitting(true)
+    // if(!file){
+    //   return null
+    // }
+    if (file) {
+      try {
+        await axios.put(presignedUrl, file, {
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+        // Handle successful upload response: save and redirect, -> resource route
+        const formData = new FormData();
+        formData.append("fileKey", studioId);
+        fetcher.submit(formData, {
+          method: "post",
+        });
+      } catch (error) {
+        console.error("Upload failed", error);
+        // setSubmitting(false)
+        // TODO Handle upload error
+      }
+    }
+  };
   return (
     <div className="page-container">
       <div className="column">
         <div className="fileViewer">
-          <div
-            className={`filesList
-            ${files.length !== 0 ? "grow" : ""}`}
-          >
-            {files.length === 0 ? (
-              <div className="title">Attach files to test file search</div>
-            ) : (
-              files.map((file) => (
-                <div key={file.file_id} className="fileEntry">
-                  <div className="fileName">
-                    <span className="fileName">{file.filename}</span>
-                    {/* <span className="fileStatus">{file.status}</span> */}
-                  </div>
-                  <span onClick={() => handleFileDelete(file.file_id)}>
-                    <TrashIcon />
-                  </span>
-                </div>
-              ))
-            )}
+          <div className="filesList">
+            <div className="title">Attach files to test file upload</div>
           </div>
           <div className="fileUploadContainer">
             <fetcher.Form method="post" encType="multipart/form-data">
@@ -175,14 +169,12 @@ export default function StudioAssistant() {
                 type="file"
                 name="file"
                 className="fileUploadInput"
-                onChange={(event) => {
-                  const body = new FormData();
+                onChange={async (event) => {
                   if (!event.target.files) return;
-                  body.append("file", event.target.files[0]);
-                  body.append("vectorStoreId", vectorStoreId);
-                  fetcher.submit(body, {
-                    method: "POST",
-                    encType: "multipart/form-data",
+                  await axios.put(presignedUrl, event.target.files[0], {
+                    headers: {
+                      "Content-Type": event.target.files[0].type,
+                    },
                   });
                 }}
               />
