@@ -1,4 +1,3 @@
-# Remix Blues Stack
 
 ## [Dancer Notes](https://www.dancernotes.com)
 
