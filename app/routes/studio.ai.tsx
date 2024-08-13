@@ -13,11 +13,12 @@ import styles from "~/css/file-viewer.css";
 import TrashIcon from "~/components/icons/TrashIcon";
 import Chat from "~/components/Chat";
 import { requireStudioUserId } from "~/models/studio.server";
+import axios from "axios";
 import { prisma } from "~/db.server";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { useState } from "react";
-import axios from "axios";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { json } from "stream/consumers";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -89,8 +90,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const studioId = await requireStudioUserId(request);
-
+  const userId = await requireStudioUserId(request);
   const client = new S3Client({
     credentials: {
       accessKeyId: process.env.STORAGE_ACCESS_KEY!,
@@ -99,23 +99,68 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     region: process.env.STORAGE_REGION,
   });
 
-  const fileKey = studioId;
   const presignedUrl = await getSignedUrl(
     client,
     new PutObjectCommand({
       Bucket: "dancernotes",
-      Key: `compSchedules/${fileKey}`,
+      Key: `compSchedules/${userId}`,
+      // ContentType: "image/jpeg",
     }),
   );
 
-  return { presignedUrl, studioId };
+  if (!presignedUrl) {
+    throw new Error("Error obtaining presigned url");
+  } else {
+    let files: [] = [];
+    return { presignedUrl, files };
+  }
+
+  // const user = await prisma.studio.findUnique({
+  //   where: {
+  //     userId,
+  //   },
+  //   select: {
+  //     vectorStoreId: true,
+  //     name: true,
+  //   },
+  // });
+
+  // if (!user) throw new Error("User not found");
+  // let vectorStoreId = user.vectorStoreId;
+
+  // if (!vectorStoreId) {
+  //   vectorStoreId = await createVectorStore({
+  //     userName: user.name,
+  //     userId,
+  //   });
+  // }
+
+  // each studio / user has a vector store unique to them. ...
+  // get files that belong to this vector store, unique to studio/user
+
+  // const filesArray = await Promise.all(
+  //   fileList.data.map(async (file) => {
+  //     const fileDetails = await openai.files.retrieve(file.id);
+  //     return {
+  //       file_id: file.id,
+  //       filename: fileDetails.filename,
+  //     };
+  //   }),
+  // );
+  //todo - should create thread go in chat component when a new message is sent?
+  // const thread = await openai.beta.threads.create();
+  // return {
+  //   files: filesArray,
+  //   // threadId: thread.id,
+  //   vectorStoreId,
+  // };
 };
 
 export default function StudioAssistant() {
   const fetcher = useFetcher();
-  const [file, setFile] = useState<File | null>();
 
-  const { presignedUrl, studioId } = useLoaderData<typeof loader>();
+  const { presignedUrl, files } = useLoaderData<typeof loader>();
+  console.log("presignedUrl", presignedUrl);
 
   const handleFileDelete = (fileId: string) => {
     const body = new FormData();
@@ -125,37 +170,59 @@ export default function StudioAssistant() {
     });
   };
 
-  const handleS3Upload = async (e) => {
+  const handleFileUpload = async (e) => {
     e.preventDefault();
-    // setSubmitting(true)
-    if (!e.target.files) return;
-    const file = e.target.files[0];
-    // 1. upload to s3
-    try {
-      const upRes = await axios.put(presignedUrl, file, {
-        headers: {
-          "Content-Type": file.type,
-        },
-      });
 
-      const fileUrl = upRes.config.url;
-      //2a?. save file url to studio db
-      // 2b. split with langchain.
-      // 3. save to supabase vector store.
-      // 4. submit to openai for analysis and response.
-      // Handle successful upload response...
-    } catch (error) {
-      console.error("Upload failed", error);
-      // setSubmitting(false)
-      // TODO Handle upload error
+    if (e.target.files) {
+      try {
+        const file = e.target.files[0];
+        console.log("file", file);
+        const upload = await axios.put(presignedUrl, file, {
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+        console.log("upload", upload);
+        // TODO - set busy UI
+
+        // Handle successful upload response: save fileKey to studio
+        // const formData = new FormData()
+        // formData.append('fileKey', fileKey)
+        // submit(formData, {
+        //   method: 'post',
+        //   action: `/parent/dancer/${dancerId}/resourceSaveImage`,
+        // })
+      } catch (error) {
+        console.error("Upload failed", error);
+        // setSubmitting(false)
+        // TODO Handle upload error
+      }
     }
   };
+
   return (
     <div className="page-container">
       <div className="column">
         <div className="fileViewer">
-          <div className="filesList">
-            <div className="title">Attach files to test file upload</div>
+          <div
+            className={`filesList
+            ${files.length !== 0 ? "grow" : ""}`}
+          >
+            {files.length === 0 ? (
+              <div className="title">Attach files to test file search</div>
+            ) : (
+              files.map((file) => (
+                <div key={file.file_id} className="fileEntry">
+                  <div className="fileName">
+                    <span className="fileName">{file.filename}</span>
+                    {/* <span className="fileStatus">{file.status}</span> */}
+                  </div>
+                  <span onClick={() => handleFileDelete(file.file_id)}>
+                    <TrashIcon />
+                  </span>
+                </div>
+              ))
+            )}
           </div>
           <div className="fileUploadContainer">
             <fetcher.Form method="post" encType="multipart/form-data">
@@ -167,7 +234,7 @@ export default function StudioAssistant() {
                 type="file"
                 name="file"
                 className="fileUploadInput"
-                onChange={(event) => handleS3Upload(event)}
+                onChange={handleFileUpload}
               />
             </fetcher.Form>
           </div>
